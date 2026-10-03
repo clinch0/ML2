@@ -100,7 +100,9 @@ def test_presentation_builds_with_speech_and_figures():
     assert 550 <= words <= 650, f"речь должна занимать ~4 минуты, сейчас {words} слов"
 
     pictures = sum(1 for slide in prs.slides for sh in slide.shapes if sh.shape_type == 13)
-    assert pictures >= 5, f"фигур на слайдах мало: {pictures}"
+    assert pictures >= 4, f"фигур на слайдах мало: {pictures}"
+    slide_eight = " ".join(shape.text for shape in prs.slides[7].shapes if shape.has_text_frame)
+    assert "Энкодер" in slide_eight and "Сходство" in slide_eight
 
 
 def test_slide_figures_are_opaque():
