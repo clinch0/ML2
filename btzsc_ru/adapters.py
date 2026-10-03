@@ -42,6 +42,13 @@ def paper_code_prefixes(model_id: str) -> tuple[str, str]:
     return ("", "")
 
 
+# Списки ключей выбора колонки логита — дословно из официального кода статьи.
+# btzsc/models/reranker.py::_score_from_logits — колонка релевантности:
+RELEVANCE_KEYS = ["relevant", "entailment", "true", "yes"]
+# btzsc/models/nli.py::_find_entailment_idx — индекс entailment:
+ENTAILMENT_KEYS = ["entailment", "label_2", "true", "yes"]
+
+
 def _silence_hf() -> None:
     """Понижает болтливость transformers/datasets после их импорта (переменных окружения мало)."""
     try:
@@ -156,6 +163,169 @@ class EncoderAdapter:
         return (q @ y.T).numpy()
 
     def predict(self, texts: list[str], labels: list[str], batch_size: int = 8):
+        return self.predict_scores(texts, labels, batch_size=batch_size).argmax(axis=1)
+
+
+class RerankerAdapter:
+    """Реранкер (cross-encoder): текст = запрос, вербализация класса = документ.
+
+    Перенос БУКВА В БУКВУ официального `btzsc/models/reranker.py::RerankerModel`:
+    `AutoModelForSequenceClassification`, пара (текст, метка) одним проходом,
+    выбор колонки логита в `_score_from_logits` по `label2id` из конфига модели
+    (ключи relevant/entailment/true/yes, иначе последняя колонка; при num_labels=1 —
+    единственная). Ветка Qwen3-Reranker (промпт + вероятность «yes») сохранена,
+    хотя наш чекпоинт bge-reranker-v2-m3 в неё не попадает.
+
+    Отличия от оригинала — только обвязка: lazy-импорты, revision из ModelSpec,
+    fp16 на CUDA (у авторов bfloat16 на A100; на T4 эффективного bf16 нет,
+    а fp32 для 568M вдвое медленнее). Длину не ограничиваем, как и авторы:
+    truncation=True берёт предел самой модели.
+    """
+
+    role = "reranker"
+
+    def __init__(self, spec: ModelSpec, *, device: str | None = None, torch_dtype=None) -> None:
+        import torch
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+        _silence_hf()
+        self.spec = spec
+        self.truncated_prompts = 0
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        if torch_dtype is None and self.device == "cuda":
+            torch_dtype = torch.float16
+        self.tokenizer = AutoTokenizer.from_pretrained(spec.model_id, revision=spec.revision, use_fast=True)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            spec.model_id, revision=spec.revision, torch_dtype=torch_dtype
+        )
+        self.model.to(self.device)
+        self.model.eval()
+        self.is_qwen_reranker = "Qwen3-Reranker" in spec.model_id
+        self.token_true_id, self.token_false_id = 9693, 2152
+
+    def _score_from_logits(self, logits):
+        """Колонка релевантности из логитов — дословно официальный `_score_from_logits`."""
+        if logits.ndim == 1:
+            return logits
+        if logits.shape[-1] == 1:
+            return logits[:, 0]
+        mapping = getattr(self.model.config, "label2id", {}) or {}
+        lower = {str(k).lower(): int(v) for k, v in mapping.items()}
+        for key in RELEVANCE_KEYS:
+            if key in lower:
+                return logits[:, lower[key]]
+        return logits[:, -1]
+
+    @staticmethod
+    def _qwen_prompt(text: str, label: str) -> str:
+        """Промпт Qwen3-Reranker — дословно официальный `_qwen_prompt`."""
+        inst = "Given a piece of text, retrieve relevant label descriptions that best match the text"
+        prefix = (
+            "<|im_start|>system\nJudge whether the Document meets the requirements based on the Query "
+            'and the Instruct provided. Note that the answer can only be "yes" or "no".<|im_end|>\n'
+            "<|im_start|>user\n"
+        )
+        suffix = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        return f"{prefix}<Instruct>: {inst}\n<Query>: {text}\n<Document>: {label}{suffix}"
+
+    def predict_scores(self, texts: list[str], labels: list[str], batch_size: int = 8):
+        import numpy as np
+        import torch
+
+        output: list[np.ndarray] = []
+        with torch.no_grad():
+            for text in texts:
+                row: list[float] = []
+                for i in range(0, len(labels), batch_size):
+                    chunk = labels[i : i + batch_size]
+                    if self.is_qwen_reranker:
+                        prompts = [self._qwen_prompt(text, lbl) for lbl in chunk]
+                        enc = self.tokenizer(prompts, padding=True, truncation=True, return_tensors="pt").to(
+                            self.device
+                        )
+                        logits = self.model(**enc).logits[:, -1, :]
+                        true_vec = logits[:, self.token_true_id]
+                        false_vec = logits[:, self.token_false_id]
+                        scores = torch.stack([false_vec, true_vec], dim=1).softmax(dim=1)[:, 1]
+                    else:
+                        enc = self.tokenizer(
+                            [text] * len(chunk), chunk, padding=True, truncation=True, return_tensors="pt"
+                        ).to(self.device)
+                        logits = self.model(**enc).logits
+                        scores = self._score_from_logits(logits)
+                    row.extend(scores.detach().float().cpu().tolist())
+                output.append(np.array(row, dtype=np.float32))
+        return np.stack(output, axis=0)
+
+    def predict(self, texts: list[str], labels: list[str], batch_size: int = 8):
+        return self.predict_scores(texts, labels, batch_size=batch_size).argmax(axis=1)
+
+
+class NLIAdapter:
+    """NLI: логит класса entailment как скор пары (текст, гипотеза-вербализация).
+
+    Перенос БУКВА В БУКВУ официального `btzsc/models/nli.py::NLIModel`: индекс entailment
+    ищется в `label2id` по ключам entailment/label_2/true/yes (`_find_entailment_idx`),
+    иначе max(label2id.values()); при num_labels=1 берётся единственная колонка.
+    Отличия — только обвязка (lazy-импорты, revision из ModelSpec); dtype по умолчанию
+    fp32, как у `from_pretrained` без аргумента (авторы передают dtype снаружи).
+    """
+
+    role = "nli"
+
+    def __init__(self, spec: ModelSpec, *, device: str | None = None, torch_dtype=None) -> None:
+        import torch
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+        _silence_hf()
+        self.spec = spec
+        self.truncated_prompts = 0
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.tokenizer = AutoTokenizer.from_pretrained(spec.model_id, revision=spec.revision, use_fast=True)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            spec.model_id, revision=spec.revision, torch_dtype=torch_dtype
+        )
+        self.model.to(self.device)
+        self.model.eval()
+        self.entailment_idx = self._find_entailment_idx()
+
+    def _find_entailment_idx(self) -> int:
+        """Индекс entailment из label2id — дословно официальный `_find_entailment_idx`."""
+        mapping = getattr(self.model.config, "label2id", {}) or {}
+        lower = {str(k).lower(): int(v) for k, v in mapping.items()}
+        for key in ENTAILMENT_KEYS:
+            if key in lower:
+                return lower[key]
+        if mapping:
+            return int(max(mapping.values()))
+        return 0
+
+    def predict_scores(self, texts: list[str], labels: list[str], batch_size: int = 16):
+        import numpy as np
+        import torch
+
+        all_scores: list[np.ndarray] = []
+        with torch.no_grad():
+            for text in texts:
+                pairs = [(text, label) for label in labels]
+                row_scores: list[float] = []
+                for i in range(0, len(pairs), batch_size):
+                    batch_pairs = pairs[i : i + batch_size]
+                    a = [x[0] for x in batch_pairs]
+                    b = [x[1] for x in batch_pairs]
+                    enc = self.tokenizer(a, b, padding=True, truncation=True, return_tensors="pt").to(self.device)
+                    logits = self.model(**enc).logits
+                    if logits.ndim == 1:
+                        vals = logits
+                    elif logits.shape[-1] == 1:
+                        vals = logits[:, 0]
+                    else:
+                        vals = logits[:, self.entailment_idx]
+                    row_scores.extend(vals.detach().float().cpu().tolist())
+                all_scores.append(np.array(row_scores, dtype=np.float32))
+        return np.stack(all_scores, axis=0)
+
+    def predict(self, texts: list[str], labels: list[str], batch_size: int = 16):
         return self.predict_scores(texts, labels, batch_size=batch_size).argmax(axis=1)
 
 
@@ -340,6 +510,11 @@ def build_adapter(spec: ModelSpec, **kwargs) -> Adapter:
         return EncoderAdapter(spec, **kwargs)
     kwargs.pop("backend", None)
     kwargs.pop("prefix_policy", None)
+    if spec.role in ("reranker", "nli"):
+        kwargs.pop("use_chat_template", None)
+        kwargs.pop("max_length", None)       # кросс-энкодеры не ограничивают длину, как и авторы
+        cls = RerankerAdapter if spec.role == "reranker" else NLIAdapter
+        return cls(spec, **kwargs)
     if spec.role == "llm":
         return LLMAdapter(spec, **kwargs)
     raise ValueError(f"неизвестная роль: {spec.role}")

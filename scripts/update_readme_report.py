@@ -6,12 +6,23 @@ import argparse
 import csv
 import json
 import statistics
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from btzsc_ru.config import MODELS_BY_ID  # noqa: E402
+
 START = "<!-- REPORT:START -->"
 END = "<!-- REPORT:END -->"
+ROLE_LABELS = {"encoder": "энкодер", "reranker": "реранкер", "nli": "NLI", "llm": "LLM"}
+MODEL_ROLES = {model_id: spec.role for model_id, spec in MODELS_BY_ID.items()}
+
+
+def family(model_id: str) -> str:
+    return ROLE_LABELS.get(MODEL_ROLES.get(model_id, ""), "другое")
 
 FIGURES = (
     ("fig6_families.png", "Семейства моделей", "Схема способов классификации и их вычислительной цены."),
@@ -62,14 +73,14 @@ def score_rows(rows: list[dict[str, str]], tests: set[str]) -> list[tuple[str, s
 
 def table(scores: list[tuple[str, str, float, float, int, int]], *, block: bool) -> list[str]:
     lines = [
-        "| Блок | Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |"
+        "| Блок | Семейство | Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |"
         if block else
-        "| Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |",
-        "|---|---|---:|---:|---:|---:|" if block else "|---|---:|---:|---:|---:|",
+        "| Семейство | Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |",
+        "|---|---|---|---:|---:|---:|---:|" if block else "|---|---|---:|---:|---:|---:|",
     ]
     for test, model, f1, accuracy, count, n in scores:
         label = f"`{model}`"
-        cells = [test, label] if block else [label]
+        cells = [test, family(model), label] if block else [family(model), label]
         cells += [f"{f1:.3f}", f"{accuracy:.3f}", str(count), str(n)]
         lines.append("| " + " | ".join(cells) + " |")
     return lines
@@ -142,7 +153,8 @@ def render(run_id: str) -> str:
         )
     lines += ["", "### Методика и сопоставимость", ""]
     if common:
-        lines.append("Блок А содержит модели статьи, блок Б — наши модели. Сравнение блоков "
+        lines.append("Блок А содержит модели статьи, блок Б — выбранные для расширения модели, "
+                     "включая реранкер и NLI, если они входят в этот прогон. Сравнение блоков "
                      "допустимо на общих датасетах при одинаковом размере выборки. "
                      "В таблицах ниже приведено невзвешенное среднее macro-F1 по задачам для каждой модели.")
     if tests.get("baseline"):

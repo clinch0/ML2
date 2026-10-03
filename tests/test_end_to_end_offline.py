@@ -36,6 +36,9 @@ def run_pipeline(tmp_path: Path) -> dict:
         "BTZSC_BLOCK_DATASETS": LOCAL_DATASETS,
         "BTZSC_BLOCK_A_MODELS": "intfloat/e5-base-v2,BAAI/bge-base-en-v1.5",
         "BTZSC_BLOCK_B_MODELS": "deepvk/USER-bge-m3,sergeyzh/BERTA",
+        # Якорь по умолчанию включает btzsc_imdb, а его parquet в data/ нет (большой).
+        # Берём локальные наборы + agnews: якорь проверяется и на длинном датасете.
+        "BTZSC_ANCHOR_DATASETS": LOCAL_DATASETS + ",btzsc_agnews",
     }
     proc = subprocess.run(
         [sys.executable, "experiment.py", "--mode", "all", "--run-id", "e2e",

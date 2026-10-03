@@ -218,7 +218,8 @@ def test_block_b_has_no_duplicate_origin():
     assert "ai-forever/FRIDA" in BLOCK_B_MODEL_IDS, "сама FRIDA должна быть в блоке"
     distillates = {"sergeyzh/BERTA", "sergeyzh/rubert-mini-frida"}
     assert len(distillates & set(BLOCK_B_MODEL_IDS)) <= 1, "в блоке не больше одного дистиллята FRIDA"
-    assert len(BLOCK_B_MODEL_IDS) == 5
+    # 5 исходных моделей + третье и четвёртое семейства статьи (reranker, NLI)
+    assert len(BLOCK_B_MODEL_IDS) == 7
 
 
 def test_block_b_sources_are_distinct():

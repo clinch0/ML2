@@ -42,6 +42,8 @@ SHORT = {
     "intfloat/multilingual-e5-base": "multilingual-e5-base",
     "Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct": "Vikhr-Qwen-2.5-1.5B",
     "Qwen/Qwen2.5-1.5B-Instruct": "Qwen2.5-1.5B-Instruct",
+    "BAAI/bge-reranker-v2-m3": "bge-reranker-v2-m3",
+    "cointegrated/rubert-base-cased-nli-threeway": "rubert-base-nli-3way",
 }
 ROLE = {
     "sergeyzh/rubert-mini-frida": "энкодер",
@@ -54,8 +56,11 @@ ROLE = {
     "intfloat/multilingual-e5-base": "энкодер",
     "Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct": "LLM 1.5B",
     "Qwen/Qwen2.5-1.5B-Instruct": "LLM 1.5B",
+    "BAAI/bge-reranker-v2-m3": "реранкер",
+    "cointegrated/rubert-base-cased-nli-threeway": "NLI",
 }
-COLOR = {"энкодер": "#1f6feb", "LLM 1.5B": "#c2410c"}
+COLOR = {"энкодер": "#1f6feb", "LLM 1.5B": "#c2410c",
+         "реранкер": "#047857", "NLI": "#7c3aed"}
 INK = "#111827"
 MUTED = "#6b7280"
 
@@ -144,11 +149,11 @@ def fig_paper_vs_ours(ours: list[dict], paper: list[dict], n_samples: str) -> Pa
         block.setdefault(r["model_id"], r.get("test") or "")
 
     def colour(mid: str) -> str:
-        if ROLE.get(mid) == "LLM 1.5B":
-            return COLOR["LLM 1.5B"]
+        if ROLE.get(mid) in ("LLM 1.5B", "реранкер", "NLI"):
+            return COLOR[ROLE[mid]]
         return "#1f6feb" if block.get(mid) == "block_b" else "#0b2e59"
 
-    fig, axes = plt.subplots(1, 2, figsize=(13.4, 6.4))
+    fig, axes = plt.subplots(1, 2, figsize=(13.4, 6.4 + max(0, len(per) - 10) * 0.35))
     fig.patch.set_facecolor("white")
     top_limit = 1.02
     for ax, key, label in zip(axes, ("btzsc_agnews", "btzsc_imdb"), ("AG News", "IMDb")):
@@ -189,14 +194,17 @@ def fig_paper_vs_ours(ours: list[dict], paper: list[dict], n_samples: str) -> Pa
         ax.yaxis.label.set_path_effects(HALO)
         ax.title.set_path_effects(HALO)
     axes[0].scatter([], [], s=110, color="#0b2e59", label="блок А — модели статьи, наш код")
-    axes[0].scatter([], [], s=110, color="#1f6feb", label="блок Б — российские модели")
-    axes[0].scatter([], [], s=110, color=COLOR["LLM 1.5B"], label="LLM 1.5B в 4-bit")
+    axes[0].scatter([], [], s=110, color="#1f6feb", label="блок Б — энкодеры")
+    for role, label in (("LLM 1.5B", "LLM 1.5B в 4-bit"),
+                        ("реранкер", "реранкер блока Б"), ("NLI", "NLI блока Б")):
+        if any(ROLE.get(mid) == role for mid in per):
+            axes[0].scatter([], [], s=110, color=COLOR[role], label=label)
     leg = axes[0].legend(loc="lower right", fontsize=8.5, frameon=False)
     for txt in leg.get_texts():
         txt.set_color(INK)
         txt.set_path_effects(HALO)
     sup = fig.suptitle("Одни и те же два датасета статьи: её модели, её чекпоинты в нашем коде "
-                       "и российские модели",
+                       "и модели блока Б",
                        fontsize=14, color=INK, weight="bold", y=0.985)
     sup.set_path_effects(HALO)
     fig.subplots_adjust(top=0.88, wspace=0.28)
@@ -289,7 +297,7 @@ def fig_core_vs_paper(ours: list[dict], n_samples: str) -> Path | None:
     if not mine:
         return None
 
-    fig, ax = plt.subplots(figsize=(12.4, 6.6))
+    fig, ax = plt.subplots(figsize=(12.4, 6.6 + max(0, len(mine) - 10) * 0.35))
     fig.patch.set_facecolor("white")
     xs = [0.10 * ((i % 7) - 3) for i in range(len(paper))]
     ax.scatter(xs, [v for _, v in paper], s=52, color="#9ca3af", alpha=0.65, zorder=2,
@@ -305,7 +313,7 @@ def fig_core_vs_paper(ours: list[dict], n_samples: str) -> Path | None:
     mine.sort(key=lambda t: t[1])
     label_y = spread([v for _, v, _ in mine], gap=0.030)
     for (mid, value, full), ly in zip(mine, label_y):
-        color = (COLOR["LLM 1.5B"] if ROLE.get(mid) == "LLM 1.5B"
+        color = (COLOR[ROLE[mid]] if ROLE.get(mid) in ("LLM 1.5B", "реранкер", "NLI")
                  else ("#1f6feb" if block.get(mid) == "block_b" else "#0b2e59"))
         ax.scatter([1.0], [value], s=120, color=color, zorder=4, edgecolor="white", linewidth=1.0)
         ax.plot([1.05, 1.18], [value, ly], color="#9ca3af", lw=0.7, zorder=3)
@@ -319,8 +327,11 @@ def fig_core_vs_paper(ours: list[dict], n_samples: str) -> Path | None:
     ax.set_xticklabels([f"{len(paper)} моделей статьи\n(её числа, полные тесты)",
                         f"наш прогон\n(блоки А и Б, {n_samples} примеров)"], fontsize=10.5)
     ax.scatter([], [], s=120, color="#0b2e59", label="блок А — модели статьи, наш код")
-    ax.scatter([], [], s=120, color="#1f6feb", label="блок Б — российские модели")
-    ax.scatter([], [], s=120, color=COLOR["LLM 1.5B"], label="LLM 1.5B в 4-bit")
+    ax.scatter([], [], s=120, color="#1f6feb", label="блок Б — энкодеры")
+    for role, label in (("LLM 1.5B", "LLM 1.5B в 4-bit"),
+                        ("реранкер", "реранкер блока Б"), ("NLI", "NLI блока Б")):
+        if any(ROLE.get(mid) == role for mid in per):
+            ax.scatter([], [], s=120, color=COLOR[role], label=label)
     ax.set_ylabel("macro-F1, среднее по 7 датасетам статьи")
     ax.set_title("Обе группы на семи датасетах статьи, одна выборка и один код",
                  fontsize=14, weight="bold", pad=14)

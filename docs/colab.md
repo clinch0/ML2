@@ -8,7 +8,7 @@
 1. Откройте <https://colab.research.google.com> и загрузите `BTZSC_Colab.ipynb`.
 2. Выберите Runtime → Change runtime type → T4 GPU.
 3. В ячейке 1 при необходимости измените `MODE`, `RUN_ID` и адрес `GIT_REPO_URL`.
-4. Выполните ячейки сверху вниз. Ячейка 2 делает `git clone --depth 1` ветки `main`.
+4. Выполните ячейки сверху вниз. Ячейка 2 делает `git clone --depth 1` ветки `feature/anchor-cross-encoders`.
 
 Репозиторий должен содержать `experiment.py` и `requirements-colab.txt`.
 Все модели и датасеты публичные; для стандартного прогона токен не требуется.
@@ -35,14 +35,16 @@ Runtime → Run all, ячейка 8 прогонит всё по порядку 
 
 | Этап | Что делает | Признак успеха в логе |
 |---|---|---|
-| preflight | проверяет контракты датасетов, модели не грузит | `[preflight] OK за N с`, создан `preflight.json` |
-| smoke | 20 примеров на датасет, все модели | `[smoke] OK`, в `results.csv` появились строки |
-| evaluate | 300 примеров на датасет | `[evaluate] OK`; манифест пересоздаётся под 300 автоматически |
-| finetune | дообучение rubert-tiny2 на `MonoHime` train ≤ 2000 | `[finetune] OK`, создан `ft_metrics.csv` |
-| export | собирает `colab_outputs_<run_id>.zip` | `[export] OK`, в конце «итог: этапов OK 5/5» |
+| preflight | проверяет контракты без загрузки моделей | `[preflight] OK`, создан `preflight.json` |
+| anchor | модели статьи на полных сплитах пяти датасетов, включая IMDb и AG News | `[anchor] OK`, строки `baseline` в `results.csv` |
+| block_a | пять моделей статьи на семи задачах по 300 примеров | `[block_a] OK` |
+| block_b | пять базовых моделей, реранкер и NLI на тех же задачах | `[block_b] OK` |
+| export | сохраняет результаты основной части | `[export] OK`, создан `colab_outputs_<run_id>.zip` |
+| finetune / extra_models / ru_extension | дополнительные этапы, включённые настройками ноутбука | соответствующие строки `OK` или `NOT_RUN` |
+| export_final | обновляет ZIP после дополнительных этапов | `[export_final] OK` |
 
-Итоговая строка `итог: этапов OK 5/5` и файл `run_all_report.json` — главный признак,
-что прогон закончился целиком. Если какой-то этап упал, остальные всё равно выполняются,
+Итоговая строка `итог: этапов OK X/Y` и файл `run_all_report.json` показывают,
+сколько этапов завершилось. Если какой-то этап упал, остальные всё равно выполняются,
 а причина пишется в `errors.log` и в `run_all_report.json`.
 
 Отдельные этапы (`MODE = "smoke"` и т. д.) остались для случаев, когда нужен только один шаг,
@@ -84,9 +86,9 @@ Runtime → Run all, ячейка 8 прогонит всё по порядку 
 (именно с таким именем — скрипт извлекает `run_id` из имени файла), затем:
 
 ```bash
-python scripts/import_colab_outputs.py incoming/colab_outputs_<run_id>.zip
+python scripts/build_reports.py --skip-pptx
 ```
 
 Скрипт проверит структуру архива, пересчитает метрики из `predictions.jsonl`, запишет
-`results/<run_id>/` и обновит раздел «Результаты» в `Эксперимент_BTZSC.md`.
+`results/<run_id>/`, построит графики и обновит таблицы в `README.md`.
 Расхождения между `results.csv` из Colab и пересчётом выводятся явным списком.

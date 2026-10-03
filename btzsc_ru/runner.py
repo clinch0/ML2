@@ -289,7 +289,13 @@ def evaluate(cfg: RunConfig, out_dir: Path, *, cache_dir: str | None = None, run
                 )
             continue
 
-        batch_size = model_spec.batch_size if model_spec.role == "llm" else cfg.encoder_batch_sizes[0]
+        # Эмбеддеры берут крупный батч из конфига; LLM и кросс-энкодеры (reranker/NLI) —
+        # собственный batch_size из ModelSpec (дефолты официальных адаптеров: 8 и 16 пар).
+        batch_size = (
+            model_spec.batch_size
+            if model_spec.role in ("llm", "reranker", "nli")
+            else cfg.encoder_batch_sizes[0]
+        )
         for key in cfg.dataset_keys:
             pair_no += 1
             bar.background = prefetcher.status
@@ -542,21 +548,24 @@ def block_b(cfg: RunConfig, out_dir: Path, *, cache_dir: str | None = None, run_
 
 
 def anchor(cfg: RunConfig, out_dir: Path, *, cache_dir: str | None = None, run_id: str = "local") -> Path:
-    """ЯКОРЬ: модели статьи на ПОЛНОМ сплите дешёвых датасетов статьи.
+    """ЯКОРЬ: модели статьи на ПОЛНОМ сплите датасетов статьи.
 
     Единственная часть прогона, числа которой можно класть рядом с опубликованными
-    (comparable_to_paper=True). Стоит недорого: 3 датасета по ≤ 2000 примеров.
+    (comparable_to_paper=True). Помимо трёх коротких датасетов включает agnews и imdb:
+    только на длинных текстах проверяется гипотеза об обрезке длины у e5 (см. config.py).
+    Минимальный вариант при нехватке времени — переменные BTZSC_ANCHOR_MODELS /
+    BTZSC_ANCHOR_DATASETS (2 модели × 2 длинных датасета ≈ 7 минут на T4).
     """
     from dataclasses import replace
 
-    from .config import ANCHOR_DATASET_KEYS, ANCHOR_N, BLOCK_A_MODEL_IDS
+    from .config import ANCHOR_DATASET_KEYS, ANCHOR_MODEL_IDS, ANCHOR_N
 
     cfg_anchor = replace(
         cfg,
         mode="baseline",
         n_samples=ANCHOR_N,
         dataset_keys=tuple(ANCHOR_DATASET_KEYS),
-        model_ids=tuple(BLOCK_A_MODEL_IDS),
+        model_ids=tuple(ANCHOR_MODEL_IDS),
     )
     return evaluate(cfg_anchor, Path(out_dir), cache_dir=cache_dir, run_id=run_id, test="baseline")
 
@@ -642,7 +651,7 @@ def run_all(
     if with_anchor:
         _stage("anchor", lambda: str(anchor(cfg, out_dir, cache_dir=cache_dir, run_id=run_id)))
 
-    # Основная схема работы: два блока по 5 моделей на одних и тех же данных и выборке.
+    # Основная схема: блоки А и Б на одних и тех же данных и выборке.
     _stage("block_a", lambda: str(block_a(cfg, out_dir, cache_dir=cache_dir, run_id=run_id)))
     _stage("block_b", lambda: str(block_b(cfg, out_dir, cache_dir=cache_dir, run_id=run_id)))
 

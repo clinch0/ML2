@@ -57,6 +57,7 @@ jobs:
           BTZSC_BLOCK_DATASETS=btzsc_rottentomatoes,btzsc_financialphrasebank \
           BTZSC_BLOCK_A_MODELS=intfloat/e5-base-v2,BAAI/bge-base-en-v1.5 \
           BTZSC_BLOCK_B_MODELS=deepvk/USER-bge-m3,sergeyzh/BERTA \
+          BTZSC_ANCHOR_DATASETS=btzsc_rottentomatoes,btzsc_financialphrasebank,btzsc_agnews \
           python experiment.py --mode all --run-id ci --out /tmp/ci-run --n-samples 6 \
           --no-ru-extension --no-finetune
           python - <<'CHECK'

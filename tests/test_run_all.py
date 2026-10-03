@@ -63,7 +63,8 @@ def test_blocks_share_datasets_and_sample_but_differ_in_models(tmp_path, monkeyp
 
     a, b = seen["block_a"], seen["block_b"]
     assert a[0] == tuple(BLOCK_A_MODEL_IDS) and b[0] == tuple(BLOCK_B_MODEL_IDS)
-    assert len(a[0]) == 5 and len(b[0]) == 5, "в каждом блоке ровно 5 моделей"
+    # Блок А — 5 моделей статьи; блок Б — 5 наших + reranker + NLI (семейства статьи 3 и 4).
+    assert len(a[0]) == 5 and len(b[0]) == 7, "состав блоков: 5 в А, 7 в Б"
     assert a[1] == b[1] == tuple(BLOCK_DATASET_KEYS), "датасеты одинаковые"
     assert a[2] == b[2], "выборка одинаковая"
     assert a[3] == "block_a" and b[3] == "block_b", "строки помечаются колонкой test"

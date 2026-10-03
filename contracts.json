@@ -528,6 +528,42 @@
       "role": "llm",
       "status": "REJECTED",
       "reason": "LLM, не энкодер; открытых эмбеддеров Яндекс не публикует; лицензия не Apache — коммерческое использование ограничено 10 млн токенов в месяц"
+    },
+    "BAAI/bge-reranker-v2-m3": {
+      "role": "reranker",
+      "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+      "params_total": 567755777,
+      "size_ok_le_4B": true,
+      "license": "apache-2.0",
+      "library": "transformers (AutoModelForSequenceClassification)",
+      "architecture": "XLMRobertaForSequenceClassification",
+      "pooling": null,
+      "pooling_source": "не применяется: cross-encoder, пара (текст, метка) одним проходом",
+      "query_prefix": "",
+      "label_prefix": "",
+      "prefix_source": "config.json: num_labels=1, id2label={'0': 'LABEL_0'} → скор = logits[:, 0] (ветка shape[-1]==1 официального _score_from_logits); ключи relevant/entailment/true/yes не нужны",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK",
+      "notes": "мультиязычный реранкер BAAI (не русский); max_position_embeddings=8194; вывод формулируется на уровне семейства"
+    },
+    "cointegrated/rubert-base-cased-nli-threeway": {
+      "role": "nli",
+      "revision": "920cbb52ef830e94461bf141ec2119979b6049e2",
+      "params_total": 177855747,
+      "size_ok_le_4B": true,
+      "license": "unspecified (в карточке не указана)",
+      "library": "transformers (AutoModelForSequenceClassification)",
+      "architecture": "BertForSequenceClassification",
+      "pooling": null,
+      "pooling_source": "не применяется: cross-encoder NLI, пара (premise=текст, hypothesis=метка)",
+      "query_prefix": "",
+      "label_prefix": "",
+      "prefix_source": "config.json: label2id={'entailment': 0, 'contradiction': 1, 'neutral': 2} → официальный _find_entailment_idx находит ключ 'entailment' → logits[:, 0]",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK",
+      "notes": "русское NLI-семейство 178M; база DeepPavlov/rubert-base-cased, обучение cointegrated/nli-rus-translated-v2021; max_position_embeddings=512"
     }
   }
 }

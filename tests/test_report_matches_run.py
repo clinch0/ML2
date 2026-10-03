@@ -47,16 +47,16 @@ def mean_by_model(test: str) -> dict[str, float]:
 def test_main_table_of_report_equals_results_csv():
     """Таблица «обе группы на одной шкале» — ровно средние по block_a и block_b."""
     text = REPORT.read_text(encoding="utf-8")
-    if "| Блок | Модель | ср. macro-F1" not in text:
+    if "| Блок | Семейство | Модель | ср. macro-F1" not in text:
         pytest.skip("в текущем прогоне нет таблицы блоков А и Б")
-    table = text[text.index("| Блок | Модель | ср. macro-F1"):]
+    table = text[text.index("| Блок | Семейство | Модель | ср. macro-F1"):]
     table = table[: table.index("\n\n")]
 
     means = mean_by_model("block_a") | mean_by_model("block_b")
     checked = 0
     for line in table.splitlines()[2:]:
         cells = [c.strip().strip("*") for c in line.strip().strip("|").split("|")]
-        model_id, claimed = cells[1].strip("`"), float(cells[2])
+        model_id, claimed = cells[2].strip("`"), float(cells[3])
         assert model_id in means, f"{model_id}: модели нет в прогоне"
         assert claimed == pytest.approx(means[model_id], abs=0.001), \
             f"{model_id}: в отчёте {claimed}, в прогоне {means[model_id]:.3f}"

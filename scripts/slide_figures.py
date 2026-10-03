@@ -30,6 +30,8 @@ MUTED = "#6b7280"
 CARD = "#eef2f7"
 BLUE = "#1f6feb"
 ORANGE = "#c2410c"
+RERANKER = "#047857"
+NLI = "#7c3aed"
 GREEN = "#15803d"
 RED = "#b91c1c"
 LINE = "#cbd5e1"
@@ -135,6 +137,10 @@ def fig_quality_bars(rows: list[dict], short: dict[str, str], role: dict[str, st
     def colour(mid: str, test: str) -> str:
         if role.get(mid) == "LLM 1.5B":
             return ORANGE
+        if role.get(mid) == "реранкер":
+            return RERANKER
+        if role.get(mid) == "NLI":
+            return NLI
         return BLUE if test == "block_b" else NAVY
 
     fig, ax = plt.subplots(figsize=(11.6, 0.62 * len(items) + 2.8))
@@ -161,7 +167,11 @@ def fig_quality_bars(rows: list[dict], short: dict[str, str], role: dict[str, st
     for side in ("top", "right"):
         ax.spines[side].set_visible(False)
     ax.scatter([], [], s=90, color=NAVY, label="блок А — модели статьи")
-    ax.scatter([], [], s=90, color=BLUE, label="блок Б — российские энкодеры")
-    ax.scatter([], [], s=90, color=ORANGE, label="LLM 1.5B в 4-bit")
+    ax.scatter([], [], s=90, color=BLUE, label="блок Б — энкодеры")
+    for family, colour, label in (("LLM 1.5B", ORANGE, "LLM 1.5B в 4-bit"),
+                                  ("реранкер", RERANKER, "реранкер блока Б"),
+                                  ("NLI", NLI, "NLI блока Б")):
+        if any(role.get(mid) == family for mid, _, _, _ in items):
+            ax.scatter([], [], s=90, color=colour, label=label)
     ax.legend(loc="lower right", fontsize=9.5, frameon=False)
     return save(fig, "fig8_quality_bars.png")

@@ -66,4 +66,24 @@
 но: не пересортировывает метки (порядок задаёт датасет), оборачивает промпт в chat template из
 карточки модели, если он есть, и грузит модель в 4-bit с batch = 1 (ограничения Colab).
 Инструкция промпта переведена на русский, потому что оцениваются в том числе RU-датасеты.
-Все отклонения перечислены в docstring класса и в `Эксперимент_BTZSC.md`.
+Все отклонения перечислены в docstring класса; результаты прогона выводятся в `README.md`.
+
+## Протокол реранкера и NLI (основание для наших адаптеров)
+
+`RerankerModel`: `AutoModelForSequenceClassification`, пара «текст (запрос) × вербализация
+класса (документ)» одним проходом; колонка логита выбирается в `_score_from_logits` по
+`label2id` конфига (ключи `relevant`/`entailment`/`true`/`yes`, иначе последняя колонка;
+при `num_labels=1` — единственная). Для Qwen3-Reranker — отдельная ветка: ChatML-промпт и
+softmax(«no», «yes»)[1] по токенам 2152/9693. Длина не ограничивается снаружи
+(`truncation=True` → предел модели). Дефолтный batch — 8 пар.
+
+`NLIModel`: та же архитектура; скор пары — логит класса entailment, индекс которого ищет
+`_find_entailment_idx` по ключам `entailment`/`label_2`/`true`/`yes`, иначе
+`max(label2id.values())`, иначе 0. Дефолтный batch — 16 пар.
+
+Наши `btzsc_ru/adapters.RerankerAdapter` и `NLIAdapter` — перенос буква в букву (логика
+выбора колонки зафиксирована тестами `tests/test_cross_encoders.py` на пустышках).
+Отличия только в обвязке: lazy-импорты, `revision` из `ModelSpec`, fp16 на CUDA для
+реранкера 568M (авторы считали в bfloat16 на A100; на T4 эффективного bf16 нет).
+Наши чекпоинты: `BAAI/bge-reranker-v2-m3` (num_labels=1 → `logits[:, 0]`),
+`cointegrated/rubert-base-cased-nli-threeway` (`entailment=0`).

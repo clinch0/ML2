@@ -22,42 +22,42 @@ Embedding Models, Rerankers and LLMs** (Ilias Aarab, arXiv:2603.11991, ICLR 2026
 
 ### Методика и сопоставимость
 
-Блок А содержит модели статьи, блок Б — наши модели. Сравнение блоков допустимо на общих датасетах при одинаковом размере выборки. В таблицах ниже приведено невзвешенное среднее macro-F1 по задачам для каждой модели.
+Блок А содержит модели статьи, блок Б — выбранные для расширения модели, включая реранкер и NLI, если они входят в этот прогон. Сравнение блоков допустимо на общих датасетах при одинаковом размере выборки. В таблицах ниже приведено невзвешенное среднее macro-F1 по задачам для каждой модели.
 `baseline` использует полные тестовые сплиты для сверки с публикацией.
 `ru_extension` — отдельный набор русских и парных языковых задач; его средние не смешиваются со средними блоков А и Б.
 
 ### Блоки А и Б: одна шкала
 
-| Блок | Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |
-|---|---|---:|---:|---:|---:|
-| block_a | `BAAI/bge-large-en-v1.5` | 0.706 | 0.727 | 7 | 300 |
-| block_a | `intfloat/e5-large-v2` | 0.694 | 0.714 | 7 | 300 |
-| block_a | `BAAI/bge-base-en-v1.5` | 0.677 | 0.705 | 7 | 300 |
-| block_a | `intfloat/e5-base-v2` | 0.670 | 0.693 | 7 | 300 |
-| block_a | `sentence-transformers/all-MiniLM-L6-v2` | 0.588 | 0.608 | 7 | 300 |
-| block_b | `deepvk/USER-bge-m3` | 0.691 | 0.714 | 7 | 300 |
-| block_b | `ai-forever/FRIDA` | 0.690 | 0.713 | 7 | 300 |
-| block_b | `intfloat/multilingual-e5-base` | 0.659 | 0.685 | 7 | 300 |
-| block_b | `sergeyzh/rubert-mini-frida` | 0.650 | 0.670 | 7 | 300 |
-| block_b | `Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct` | 0.311 | 0.380 | 7 | 300 |
+| Блок | Семейство | Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |
+|---|---|---|---:|---:|---:|---:|
+| block_a | энкодер | `BAAI/bge-large-en-v1.5` | 0.706 | 0.727 | 7 | 300 |
+| block_a | энкодер | `intfloat/e5-large-v2` | 0.694 | 0.714 | 7 | 300 |
+| block_a | энкодер | `BAAI/bge-base-en-v1.5` | 0.677 | 0.705 | 7 | 300 |
+| block_a | энкодер | `intfloat/e5-base-v2` | 0.670 | 0.693 | 7 | 300 |
+| block_a | энкодер | `sentence-transformers/all-MiniLM-L6-v2` | 0.588 | 0.608 | 7 | 300 |
+| block_b | энкодер | `deepvk/USER-bge-m3` | 0.691 | 0.714 | 7 | 300 |
+| block_b | энкодер | `ai-forever/FRIDA` | 0.690 | 0.713 | 7 | 300 |
+| block_b | энкодер | `intfloat/multilingual-e5-base` | 0.659 | 0.685 | 7 | 300 |
+| block_b | энкодер | `sergeyzh/rubert-mini-frida` | 0.650 | 0.670 | 7 | 300 |
+| block_b | LLM | `Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct` | 0.311 | 0.380 | 7 | 300 |
 
 Источник: строки `block_a` и `block_b` в CSV прогона.
 
 ### Русское расширение
 
-| Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |
-|---|---:|---:|---:|---:|
-| `deepvk/USER-bge-m3` | 0.450 | 0.500 | 7 | 300 |
-| `sergeyzh/BERTA` | 0.450 | 0.501 | 7 | 300 |
-| `sergeyzh/rubert-mini-frida` | 0.430 | 0.482 | 7 | 300 |
-| `ai-forever/FRIDA` | 0.420 | 0.475 | 7 | 300 |
-| `intfloat/multilingual-e5-base` | 0.419 | 0.469 | 7 | 300 |
-| `intfloat/multilingual-e5-small` | 0.369 | 0.411 | 7 | 300 |
-| `ai-forever/ru-en-RoSBERTa` | 0.321 | 0.371 | 7 | 300 |
-| `sergeyzh/rubert-tiny-turbo` | 0.307 | 0.350 | 7 | 300 |
-| `cointegrated/rubert-tiny2` | 0.268 | 0.315 | 7 | 300 |
-| `Qwen/Qwen2.5-1.5B-Instruct` | 0.254 | 0.288 | 7 | 300 |
-| `Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct` | 0.091 | 0.122 | 7 | 300 |
+| Семейство | Модель | ср. macro-F1 | ср. accuracy | задач | примеров на задачу |
+|---|---|---:|---:|---:|---:|
+| энкодер | `deepvk/USER-bge-m3` | 0.450 | 0.500 | 7 | 300 |
+| энкодер | `sergeyzh/BERTA` | 0.450 | 0.501 | 7 | 300 |
+| энкодер | `sergeyzh/rubert-mini-frida` | 0.430 | 0.482 | 7 | 300 |
+| энкодер | `ai-forever/FRIDA` | 0.420 | 0.475 | 7 | 300 |
+| энкодер | `intfloat/multilingual-e5-base` | 0.419 | 0.469 | 7 | 300 |
+| энкодер | `intfloat/multilingual-e5-small` | 0.369 | 0.411 | 7 | 300 |
+| энкодер | `ai-forever/ru-en-RoSBERTa` | 0.321 | 0.371 | 7 | 300 |
+| энкодер | `sergeyzh/rubert-tiny-turbo` | 0.307 | 0.350 | 7 | 300 |
+| энкодер | `cointegrated/rubert-tiny2` | 0.268 | 0.315 | 7 | 300 |
+| LLM | `Qwen/Qwen2.5-1.5B-Instruct` | 0.254 | 0.288 | 7 | 300 |
+| LLM | `Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct` | 0.091 | 0.122 | 7 | 300 |
 
 Источник: строки `ru_extension` в CSV прогона.
 
@@ -142,6 +142,19 @@ Embedding Models, Rerankers and LLMs** (Ilias Aarab, arXiv:2603.11991, ICLR 2026
 
 <!-- REPORT:END -->
 
+## Расширение протокола: длинные тексты и новые семейства
+
+В этой ветке якорь к публикации расширен: модели статьи проверяются на полных тестовых
+сплитах IMDb и AG News в дополнение к трём коротким датасетам. Это позволяет проверить
+гипотезу о влиянии обрезки длинных текстов.
+
+В блок Б добавлены `BAAI/bge-reranker-v2-m3` (реранкер) и
+`cointegrated/rubert-base-cased-nli-threeway` (NLI). Они используют тот же набор задач
+и размер выборки, что остальные модели блока Б. Отчёт выше показывает данные указанного
+в нём `run_id`; загрузка нового ZIP в `incoming/` обновляет числа и графики.
+Код прогона и ограничения описаны в
+[описании расширения](docs/extension_anchor_and_cross_encoders.md).
+
 ## Порядок чтения
 
 1. **[Результаты эксперимента](#результаты-эксперимента)** — методика, таблицы, графики и сверка со статьёй на этой странице.
@@ -177,7 +190,7 @@ btzsc_ru/                  пакет эксперимента
   data.py                  загрузка датасетов и вербализация меток
   reconstruction.py        восстановление multiclass-примеров из пар BTZSC
   sampling.py              единый sample_manifest.csv (seed 42)
-  adapters.py              энкодеры (pooling/prefix → cosine) и LLM (multiple-choice по первому токену)
+  adapters.py              энкодеры, реранкер, NLI и LLM
   metrics.py               macro-F1, accuracy, macro-P/R, покрытие классов, delta EN−RU
   io_utils.py              results.csv, predictions.jsonl, run_key, resume, бюджет времени, VRAM
   runner.py                оркестрация этапов, сверка на моделях статьи, экспорт архива
@@ -203,7 +216,7 @@ incoming/                  сюда кладутся архивы colab_outputs_
 ## Рабочий цикл
 
 1. **Прогон.** Открыть `BTZSC_Colab.ipynb` в Colab (T4), Runtime → Run all. Режим `all` сам проходит
-   preflight → smoke → evaluate → replicate → finetune → export. Подробности — [`docs/colab.md`](docs/colab.md).
+   preflight → anchor → block_a → block_b → export → дополнительные этапы → export_final. Подробности — [`docs/colab.md`](docs/colab.md).
 2. **Доставка результатов.** Скачанный `colab_outputs_<run_id>.zip` положить в `incoming/`, добавить в коммит и отправить в репозиторий.
 3. **Сборка отчёта.** Workflow [`import-results`](.github/workflows/import-results.yml)
    проверяет архив, раскладывает данные в `results/<run_id>/`, пересчитывает метрики,

@@ -212,6 +212,40 @@ LLMS: tuple[ModelSpec, ...] = (
     ),
 )
 
+# ── Кросс-энкодеры: третье и четвёртое семейства статьи (reranker, NLI) ─────
+# Статья сравнивает ПЯТЬ семейств; до сих пор у нас были только эмбеддеры и LLM.
+# Главный тезис статьи — «реранкер обходит всех», и именно он без этих моделей не проверен.
+# Оба чекпоинта идут в блок Б: тот же манифест, тот же n, та же шкала, что у остальных.
+# Адаптеры — буква в букву по официальным btzsc/models/reranker.py и nli.py (см. adapters.py).
+CROSS_ENCODERS: tuple[ModelSpec, ...] = (
+    ModelSpec(
+        model_id="BAAI/bge-reranker-v2-m3",
+        role="reranker",
+        revision="953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+        params=567_755_777,
+        license="apache-2.0",
+        batch_size=8,      # пар (текст × метка) за проход — дефолт btzsc/models/reranker.py
+        prefix_source="config.json: num_labels=1 → скор = logits[:, 0] "
+                      "(ветка `logits.shape[-1] == 1` в btzsc/models/reranker.py::_score_from_logits)",
+        notes="МУЛЬТИЯЗЫЧНЫЙ реранкер (не русский!): вывод формулируется на уровне семейства — "
+              "«мультиязычный реранкер против мультиязычных эмбеддеров». 568M, cross-encoder, "
+              "один проход на каждую пару текст × класс",
+    ),
+    ModelSpec(
+        model_id="cointegrated/rubert-base-cased-nli-threeway",
+        role="nli",
+        revision="920cbb52ef830e94461bf141ec2119979b6049e2",
+        params=177_855_747,
+        license="unspecified (в карточке модели лицензия не указана; база DeepPavlov/rubert-base-cased)",
+        batch_size=16,     # дефолт btzsc/models/nli.py
+        prefix_source="config.json: label2id={'entailment': 0, ...} → скор = logits[:, 0] "
+                      "(btzsc/models/nli.py::_find_entailment_idx, ключ 'entailment')",
+        notes="русское NLI-семейство, 178M, обучено на переведённых NLI-датасетах "
+              "(cointegrated/nli-rus-translated-v2021); база — mBERT-наследник, английский понимает. "
+              "NLI в таблице авторов — слабое семейство (bart-large-mnli 0.51)",
+    ),
+)
+
 # ── Модели статьи: блок сверки (replication) ────────────────────────────────
 # Нужны, чтобы проверить эквивалентность НАШЕГО кода коду статьи: у этих моделей
 # есть опубликованные числа на agnews и imdb (hf/results_repo/results/**, by_dataset).
@@ -342,7 +376,7 @@ def load_paper_reference() -> dict[str, dict[str, float]]:
 PAPER_REFERENCE: dict[str, dict[str, float]] = load_paper_reference()
 
 
-MODELS: tuple[ModelSpec, ...] = ENCODERS + LLMS + PAPER_MODELS
+MODELS: tuple[ModelSpec, ...] = ENCODERS + CROSS_ENCODERS + LLMS + PAPER_MODELS
 
 RESERVE_MODEL_IDS = (
     "RefalMachine/RuadaptQwen2.5-1.5B-instruct",
@@ -590,6 +624,14 @@ BLOCK_B_MODEL_IDS = (
     "sergeyzh/rubert-mini-frida",    # независимый автор, 32M — нижняя точка по памяти
     "intfloat/multilingual-e5-base",  # Microsoft, мультиязычный контроль
     "Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct",  # сообщество Vikhr, русская LLM 1.5B
+    # Третье и четвёртое семейства статьи. Считаются ТОЛЬКО на block_b (7 датасетов статьи):
+    # утверждение «порядок семейств на русском другой, чем на английском» живёт ровно там,
+    # где блоки А и Б стоят на одной шкале. В ru_extension сравнивать не с чем (нет
+    # английского эталона по семействам), а 88% стоимости кросс-энкодера дают banking77 (77
+    # классов) и massive (59). Цена block_b: 300 × 148 классов = 44 400 пар на модель —
+    # реранкер ~9–12 мин, NLI ~3–4 мин на T4.
+    "BAAI/bge-reranker-v2-m3",       # BAAI, 568M, мультиязычный реранкер (cross-encoder)
+    "cointegrated/rubert-base-cased-nli-threeway",  # cointegrated, 178M, русский NLI
 )
 
 # Почему не попали (ответ на вопрос «почему именно эти»):
@@ -606,23 +648,45 @@ BLOCK_DATASET_KEYS = BTZSC_CORE_KEYS      # 7 датасетов статьи, �
 BLOCK_N = 300                              # примеров на датасет в каждом блоке
 
 # ЯКОРЬ К ПУБЛИКАЦИИ. Без него оба блока могут одинаково врать, и заметить это не по чему.
-# Берём датасеты статьи, чей полный сплит дёшев (≤ 2000 примеров), и гоняем на них модели
-# статьи ЦЕЛИКОМ — такие строки получают comparable_to_paper=True и сверяются с публикацией.
+# Берём датасеты статьи и гоняем на них модели статьи ЦЕЛИКОМ — такие строки получают
+# comparable_to_paper=True и сверяются с публикацией.
+#
+# Длинные датасеты (agnews, imdb) добавлены не для объёма, а ради единственного
+# необъяснённого места ТЕСТА 1: в якоре run5 совпали ровно модели БЕЗ префиксов (bge — ноль
+# в ноль), а разошлись ровно модели С префиксами (e5-base −0.060). Обе наши реализации (hf и st)
+# дают по e5 одно и то же число, значит дело не в коде вокруг. Живая гипотеза — обрезка длины:
+# run1 шёл бэкендом hf с max_length=256, а у e5/bge собственный предел 512. Проверить её можно
+# ТОЛЬКО на длинных текстах; три коротких датасета ниже этот вопрос не задают в принципе.
+# Якорь по умолчанию (бэкенд st, полный сплит) отвечает на него напрямую.
+# Цена: 5 моделей × (10 000 + 7 600) длинных примеров ≈ +18–22 минуты на T4.
 ANCHOR_DATASET_KEYS = (
-    "btzsc_rottentomatoes",       # 1066 примеров
-    "btzsc_financialphrasebank",  # 690
+    "btzsc_rottentomatoes",       # 1066 примеров, короткие тексты (26 токенов)
+    "btzsc_financialphrasebank",  # 690, короткие (29 токенов)
     "btzsc_emotiondair",          # 2000
+    "btzsc_agnews",               # 7600 — тексты средней длины, есть опубликованные числа всех 5 моделей
+    "btzsc_imdb",                 # 10000 — длинные тексты, ключ к гипотезе об обрезке
 )
 ANCHOR_N: int | None = None       # None = полный сплит, как в A.4 статьи
+# Модели якоря. По умолчанию — все 5 моделей статьи. Минимальный вариант, если времени нет:
+#   BTZSC_ANCHOR_MODELS="intfloat/e5-base-v2,BAAI/bge-base-en-v1.5" \
+#   BTZSC_ANCHOR_DATASETS="btzsc_agnews,btzsc_imdb"
+# — 2 модели × 17 600 текстов ≈ 7 минут. Этого хватает для вывода: разойдётся e5 и на длинных,
+# и на коротких одинаково — обрезка ни при чём; разойдётся только на длинных — причина найдена.
+ANCHOR_MODEL_IDS = tuple(m.model_id for m in PAPER_MODELS)
 
 # Переопределения для самопроверки конвейера (офлайн, без скачивания моделей).
 # В реальном прогоне переменные не заданы и состав блоков берётся из констант выше.
+# BTZSC_ANCHOR_* дополнительно дают «минимальный якорь» (см. комментарий у ANCHOR_MODEL_IDS).
 if os.environ.get("BTZSC_BLOCK_DATASETS"):
     BLOCK_DATASET_KEYS = tuple(os.environ["BTZSC_BLOCK_DATASETS"].split(","))
 if os.environ.get("BTZSC_BLOCK_A_MODELS"):
     BLOCK_A_MODEL_IDS = tuple(os.environ["BTZSC_BLOCK_A_MODELS"].split(","))
 if os.environ.get("BTZSC_BLOCK_B_MODELS"):
     BLOCK_B_MODEL_IDS = tuple(os.environ["BTZSC_BLOCK_B_MODELS"].split(","))
+if os.environ.get("BTZSC_ANCHOR_DATASETS"):
+    ANCHOR_DATASET_KEYS = tuple(os.environ["BTZSC_ANCHOR_DATASETS"].split(","))
+if os.environ.get("BTZSC_ANCHOR_MODELS"):
+    ANCHOR_MODEL_IDS = tuple(os.environ["BTZSC_ANCHOR_MODELS"].split(","))
 
 # Расширенный набор (вне двух блоков, по умолчанию выключен): остальные модели и русские данные.
 EXTRA_MODEL_IDS = tuple(
