@@ -1,0 +1,276 @@
+{
+  "mode": "preflight",
+  "config_hash": "a186da3e9c8f",
+  "datasets": {
+    "btzsc_agnews": {
+      "status": "OK",
+      "hf_id": "btzsc/btzsc",
+      "config": "agnews",
+      "split": "test",
+      "n_classes": 4,
+      "n_samples_probe": 100,
+      "verbalizers_head": [
+        "This example news text is about business news",
+        "This example news text is about science and technology",
+        "This example news text is about sports"
+      ]
+    },
+    "btzsc_imdb": {
+      "status": "OK",
+      "hf_id": "btzsc/btzsc",
+      "config": "imdb",
+      "split": "test",
+      "n_classes": 2,
+      "n_samples_probe": 200,
+      "verbalizers_head": [
+        "The sentiment in this example imdb movie review is negative",
+        "The sentiment in this example imdb movie review is positive"
+      ]
+    },
+    "btzsc_rottentomatoes": {
+      "status": "OK",
+      "hf_id": "btzsc/btzsc",
+      "config": "rottentomatoes",
+      "split": "test",
+      "n_classes": 2,
+      "n_samples_probe": 200,
+      "verbalizers_head": [
+        "The sentiment in this example rotten tomatoes movie review is negative",
+        "The sentiment in this example rotten tomatoes movie review is positive"
+      ]
+    },
+    "btzsc_financialphrasebank": {
+      "status": "OK",
+      "hf_id": "btzsc/btzsc",
+      "config": "financialphrasebank",
+      "split": "test",
+      "n_classes": 3,
+      "n_samples_probe": 133,
+      "verbalizers_head": [
+        "The sentiment in this example is negative from an investor's perspective.",
+        "The sentiment in this example is neutral from an investor's perspective.",
+        "The sentiment in this example is positive from an investor's perspective."
+      ]
+    },
+    "btzsc_emotiondair": {
+      "status": "OK",
+      "hf_id": "btzsc/btzsc",
+      "config": "emotiondair",
+      "split": "test",
+      "n_classes": 6,
+      "n_samples_probe": 66,
+      "verbalizers_head": [
+        "This example tweet expresses the emotion: anger",
+        "This example tweet expresses the emotion: fear",
+        "This example tweet expresses the emotion: joy"
+      ]
+    },
+    "btzsc_massive": {
+      "status": "OK",
+      "hf_id": "btzsc/btzsc",
+      "config": "massive",
+      "split": "test",
+      "n_classes": 59,
+      "n_samples_probe": 6,
+      "verbalizers_head": [
+        "The example utterance is a query about alarms.",
+        "The intent of this example utterance is to remove an alarm.",
+        "The intent of the example utterance is to set an alarm."
+      ]
+    },
+    "btzsc_banking77": {
+      "status": "OK",
+      "hf_id": "btzsc/btzsc",
+      "config": "banking77",
+      "split": "test",
+      "n_classes": 72,
+      "n_samples_probe": 5,
+      "verbalizers_head": [
+        "This customer example message is about a refund not showing up.",
+        "This banking customer example message is about activating a card.",
+        "This banking customer example message is related to age limits."
+      ]
+    },
+    "ru_sentiment": {
+      "status": "OK",
+      "hf_id": "MonoHime/ru_sentiment_dataset",
+      "config": "default",
+      "split": "validation",
+      "n_classes": 3,
+      "n_samples_probe": 50,
+      "verbalizers_head": [
+        "Тональность этого русского текста нейтральная",
+        "Тональность этого русского текста положительная",
+        "Тональность этого русского текста отрицательная"
+      ]
+    },
+    "massive_en": {
+      "status": "OK",
+      "hf_id": "mteb/amazon_massive_intent",
+      "config": "en",
+      "split": "test",
+      "n_classes": 22,
+      "n_samples_probe": 50,
+      "verbalizers_head": [
+        "The user request to the voice assistant is about alarm query",
+        "The user request to the voice assistant is about alarm remove",
+        "The user request to the voice assistant is about alarm set"
+      ]
+    },
+    "massive_ru": {
+      "status": "OK",
+      "hf_id": "mteb/amazon_massive_intent",
+      "config": "ru",
+      "split": "test",
+      "n_classes": 22,
+      "n_samples_probe": 50,
+      "verbalizers_head": [
+        "The user request to the voice assistant is about alarm query",
+        "The user request to the voice assistant is about alarm remove",
+        "The user request to the voice assistant is about alarm set"
+      ]
+    },
+    "massive_scenario_en": {
+      "status": "OK",
+      "hf_id": "mteb/amazon_massive_scenario",
+      "config": "en",
+      "split": "test",
+      "n_classes": 10,
+      "n_samples_probe": 50,
+      "verbalizers_head": [
+        "The user request to the voice assistant belongs to the alarm scenario",
+        "The user request to the voice assistant belongs to the audio scenario",
+        "The user request to the voice assistant belongs to the datetime scenario"
+      ]
+    },
+    "massive_scenario_ru": {
+      "status": "OK",
+      "hf_id": "mteb/amazon_massive_scenario",
+      "config": "ru",
+      "split": "test",
+      "n_classes": 10,
+      "n_samples_probe": 50,
+      "verbalizers_head": [
+        "The user request to the voice assistant belongs to the alarm scenario",
+        "The user request to the voice assistant belongs to the audio scenario",
+        "The user request to the voice assistant belongs to the datetime scenario"
+      ]
+    },
+    "go_emotions_en": {
+      "status": "OK",
+      "hf_id": "seara/ru_go_emotions",
+      "config": "simplified",
+      "split": "test",
+      "n_classes": 28,
+      "n_samples_probe": 41,
+      "verbalizers_head": [
+        "The emotion expressed in this comment is admiration",
+        "The emotion expressed in this comment is amusement",
+        "The emotion expressed in this comment is anger"
+      ]
+    },
+    "go_emotions_ru": {
+      "status": "OK",
+      "hf_id": "seara/ru_go_emotions",
+      "config": "simplified",
+      "split": "test",
+      "n_classes": 28,
+      "n_samples_probe": 41,
+      "verbalizers_head": [
+        "The emotion expressed in this comment is admiration",
+        "The emotion expressed in this comment is amusement",
+        "The emotion expressed in this comment is anger"
+      ]
+    }
+  },
+  "models": {
+    "cointegrated/rubert-tiny2": {
+      "role": "encoder",
+      "revision": "e8ed3b0c8bbf4fb6984c3de043bf7d2f4e5969ae",
+      "pooling": "cls",
+      "query_prefix": "",
+      "status": "NOT_RUN"
+    },
+    "sergeyzh/rubert-tiny-turbo": {
+      "role": "encoder",
+      "revision": "93769a3baad2b037e5c2e4312fccf6bcfe082bf1",
+      "pooling": "cls",
+      "query_prefix": "",
+      "status": "NOT_RUN"
+    },
+    "ai-forever/ru-en-RoSBERTa": {
+      "role": "encoder",
+      "revision": "89fb1651989adbb1cfcfdedafd7d102951ad0555",
+      "pooling": "cls",
+      "query_prefix": "classification: ",
+      "status": "NOT_RUN"
+    },
+    "deepvk/USER-bge-m3": {
+      "role": "encoder",
+      "revision": "0cc6cfe48e260fb0474c753087a69369e88709ae",
+      "pooling": "cls",
+      "query_prefix": "",
+      "status": "NOT_RUN"
+    },
+    "intfloat/multilingual-e5-base": {
+      "role": "encoder",
+      "revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+      "pooling": "mean",
+      "query_prefix": "query: ",
+      "status": "NOT_RUN"
+    },
+    "ai-forever/FRIDA": {
+      "role": "encoder",
+      "revision": "850455b605544a944739b25f81ddf812b6e3d0d5",
+      "pooling": "cls",
+      "query_prefix": "categorize: ",
+      "status": "NOT_RUN"
+    },
+    "sergeyzh/rubert-mini-frida": {
+      "role": "encoder",
+      "revision": "32a82388a9f99c99eca74494731f7ee6e9a9fe3a",
+      "pooling": "mean",
+      "query_prefix": "categorize: ",
+      "status": "NOT_RUN"
+    },
+    "sergeyzh/BERTA": {
+      "role": "encoder",
+      "revision": "914c8c8aed14042ed890fc2c662d5e9e66b2faa7",
+      "pooling": "mean",
+      "query_prefix": "categorize_entailment: ",
+      "status": "NOT_RUN"
+    },
+    "intfloat/multilingual-e5-small": {
+      "role": "encoder",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "pooling": "mean",
+      "query_prefix": "query: ",
+      "status": "NOT_RUN"
+    },
+    "Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct": {
+      "role": "llm",
+      "revision": "c9f763e5097587066e602ebabed4d93ea29bb60c",
+      "pooling": null,
+      "query_prefix": "",
+      "status": "NOT_RUN"
+    },
+    "Qwen/Qwen2.5-1.5B-Instruct": {
+      "role": "llm",
+      "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+      "pooling": null,
+      "query_prefix": "",
+      "status": "NOT_RUN"
+    }
+  },
+  "environment": {
+    "code_sha256": "75a82888eddfb233",
+    "python": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "timestamp": "2026-10-02T21:27:49",
+    "torch": "2.11.0+cu130",
+    "cuda_available": true,
+    "gpu_name": "Tesla T4",
+    "gpu_total_mb": 14912.7,
+    "transformers": "5.17.0"
+  }
+}

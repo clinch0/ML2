@@ -1,0 +1,24 @@
+{
+  "manifest_hash": "5afb24000a9e",
+  "n_rows": 2100,
+  "requested_n": 300,
+  "mode": "evaluate",
+  "dataset_keys": [
+    "ru_sentiment",
+    "massive_en",
+    "massive_ru",
+    "massive_scenario_en",
+    "massive_scenario_ru",
+    "go_emotions_en",
+    "go_emotions_ru"
+  ],
+  "class_coverage": {
+    "ru_sentiment": 1.0,
+    "massive_en": 1.0,
+    "massive_ru": 1.0,
+    "massive_scenario_en": 1.0,
+    "massive_scenario_ru": 1.0,
+    "go_emotions_en": 1.0,
+    "go_emotions_ru": 1.0
+  }
+}

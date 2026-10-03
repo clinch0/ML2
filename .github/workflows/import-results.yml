@@ -1,0 +1,67 @@
+name: import-results
+
+# Триггер: в репозиторий попал архив с результатами прогона Colab.
+# Что делает: распаковывает, пересчитывает метрики, обновляет отчёт, графики,
+# сверку с числами статьи и презентацию, затем коммитит результат обратно в ветку.
+on:
+  push:
+    paths:
+      - "incoming/*.zip"
+      - "colab_outputs_*.zip"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-reports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install report dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy scikit-learn matplotlib python-pptx
+
+      - name: Show incoming archives
+        run: ls -la incoming/ 2>/dev/null; ls -la colab_outputs_*.zip 2>/dev/null || true
+
+      - name: Build reports from archives
+        run: |
+          # Удаление архивов после импорта пока ОТКЛЮЧЕНО (режим отладки).
+          # Когда цепочка будет обкатана — добавить флаг --delete-zip:
+          # python scripts/build_reports.py --delete-zip
+          python scripts/build_reports.py
+
+      - name: Show what changed
+        run: git status --short
+
+      - name: Commit updated reports
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "изменений нет"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results figures "Эксперимент_BTZSC.md" "Задание2_BTZSC.pptx" incoming || true
+          git commit -m "Авто-сборка отчётов из архива прогона [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            results/**
+            figures/**
+            Эксперимент_BTZSC.md
+            Задание2_BTZSC.pptx
+          if-no-files-found: warn

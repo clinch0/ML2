@@ -1,0 +1,719 @@
+{
+  "paper": "arXiv:2603.11991",
+  "protocol": {
+    "seed": 42,
+    "max_length": 256,
+    "sampling": "stratified by gold label",
+    "device": "cpu",
+    "training": "none (pretrained checkpoints, zero-shot)",
+    "datasets": {
+      "financialphrasebank": {
+        "task": "sentiment",
+        "n": 150,
+        "n_full": 690,
+        "n_classes": 3,
+        "dropped_unlabeled": 0
+      },
+      "rottentomatoes": {
+        "task": "sentiment",
+        "n": 120,
+        "n_full": 1066,
+        "n_classes": 2,
+        "dropped_unlabeled": 0
+      },
+      "emotiondair": {
+        "task": "emotion",
+        "n": 120,
+        "n_full": 2000,
+        "n_classes": 6,
+        "dropped_unlabeled": 0
+      },
+      "agnews": {
+        "task": "topic",
+        "n": 120,
+        "n_full": 7600,
+        "n_classes": 4,
+        "dropped_unlabeled": 0
+      },
+      "banking77": {
+        "task": "intent",
+        "n": 144,
+        "n_full": 2880,
+        "n_classes": 72,
+        "dropped_unlabeled": 200
+      }
+    },
+    "label_verbalizers": {
+      "financialphrasebank": [
+        "The sentiment in this example is negative from an investor's perspective.",
+        "The sentiment in this example is neutral from an investor's perspective.",
+        "The sentiment in this example is positive from an investor's perspective."
+      ],
+      "rottentomatoes": [
+        "The sentiment in this example rotten tomatoes movie review is negative",
+        "The sentiment in this example rotten tomatoes movie review is positive"
+      ],
+      "emotiondair": [
+        "This example tweet expresses the emotion: anger",
+        "This example tweet expresses the emotion: fear",
+        "This example tweet expresses the emotion: joy",
+        "This example tweet expresses the emotion: love",
+        "This example tweet expresses the emotion: sadness",
+        "This example tweet expresses the emotion: surprise"
+      ],
+      "agnews": [
+        "This example news text is about business news",
+        "This example news text is about science and technology",
+        "This example news text is about sports",
+        "This example news text is about world news"
+      ],
+      "banking77": [
+        "This customer example message is about a refund not showing up.",
+        "This banking customer example message is about activating a card.",
+        "This banking customer example message is related to age limits.",
+        "This banking customer example message is about apple pay or google pay",
+        "This banking customer example message requests ATM support.",
+        "This banking customer example message is about automatic top up.",
+        "This banking customer example message is about a balance not updated after a transfer.",
+        "This banking customer example message is about a balance not updated after a cheque or cash deposit.",
+        "This banking customer example message is related to a beneficiary not being allowed or a failed transfer.",
+        "This banking customer example message is related to the cancellation of a transfer.",
+        "This banking customer example message is related to the expiration of a card.",
+        "This banking customer example message is related to the scope of acceptance of a card.",
+        "This banking customer example message is about the arrival of a card.",
+        "This banking customer example message is about a card delivery estimate or timing.",
+        "This banking customer example message is about a card not working.",
+        "This banking customer example message is about a card payment fee.",
+        "This banking customer example message is about a payment the customer does not recognise.",
+        "This banking customer example message is about a wrong exchange rate.",
+        "This banking customer example message is about a card swallowed by a machine.",
+        "This banking customer example message is about a cash withdrawal charge.",
+        "This banking customer example message is about an unrecognised cash withdrawal.",
+        "This banking customer example message is about changing a pin code.",
+        "This banking customer example message is about a compromised card.",
+        "This banking customer example message is about contactless not working",
+        "This banking customer example message is about country-specific support.",
+        "This banking customer example message is about a declined card payment.",
+        "This banking customer example message is about a declined cash withdrawal.",
+        "This banking customer example message is about a declined transfer.",
+        "This banking customer example message is about an unrecognised direct debit payment.",
+        "This banking customer example message is about the limits of disposable cards.",
+        "This banking customer example message is about editing personal details.",
+        "This banking customer example message is about exchange rate charges.",
+        "This banking customer example message is about exchange rates.",
+        "This banking customer example message is about an extra charge.",
+        "This banking customer example message is about a failed transfer.",
+        "This banking customer example message is about fiat currency support",
+        "This banking customer example message is about getting a disposable virtual card.",
+        "This banking customer example message is about getting a spare card.",
+        "This banking customer example message is about getting a virtual card.",
+        "This banking customer example message is about a lost or stolen card.",
+        "This banking customer example message is about a lost or stolen phone.",
+        "This banking customer example message is about ordering a card.",
+        "This banking customer example message is about a forgotten passcode.",
+        "This banking customer example message is about a pending card payment.",
+        "This banking customer example message is about a pending cash withdrawal.",
+        "This banking customer example message is about a pending top up.",
+        "This banking customer example message is about a pending transfer.",
+        "This banking customer example message is about a blocked pin.",
+        "This banking customer example message is about receiving money.",
+        "This banking customer example message is about a refund request.",
+        "This banking customer example message is about reverting a card payment.",
+        "This banking customer example message is about terminating an account.",
+        "This banking customer example message is about the charge for topping up by card.",
+        "This banking customer example message is about topping up by cash or cheque.",
+        "This banking customer example message is about top up issues or failures.",
+        "This banking customer example message is about top up limitations.",
+        "This banking customer example message is about issues with topping up.",
+        "This banking customer example message is about topping up by card.",
+        "This banking customer example message is about a transaction charged twice.",
+        "This banking customer example message is about an issue with a transfer fee charge.",
+        "This banking customer example message is about transfers into the customer's own account.",
+        "This banking customer example message is about a transfer that has not arrived yet.",
+        "This banking customer example message is about transfer timing.",
+        "This banking customer example message is about an issue with identity verification.",
+        "This banking customer example message is about identity verification.",
+        "This banking customer example message is about the source of funds.",
+        "This banking customer example message is about verification and top ups",
+        "This banking customer example message is about a virtual card not working",
+        "This banking customer example message is about types of bank cards.",
+        "This banking customer example message questions why identity verification is necessary.",
+        "This banking customer example message is about a wrong amount of cash received.",
+        "This banking customer example message is about a wrong exchange rate for a cash withdrawal."
+      ]
+    }
+  },
+  "models": {
+    "majority-class": {
+      "overall": {
+        "accuracy": 0.25277777777777777,
+        "macro_f1": 0.12959991302457058,
+        "macro_precision": 0.09031635802469136,
+        "macro_recall": 0.25277777777777777
+      },
+      "by_task": {
+        "emotion": {
+          "accuracy": 0.16666666666666666,
+          "macro_f1": 0.047619047619047616,
+          "macro_precision": 0.027777777777777776,
+          "macro_recall": 0.16666666666666666,
+          "datasets": [
+            "emotiondair"
+          ]
+        },
+        "intent": {
+          "accuracy": 0.013888888888888888,
+          "macro_f1": 0.000380517503805175,
+          "macro_precision": 0.00019290123456790122,
+          "macro_recall": 0.013888888888888888,
+          "datasets": [
+            "banking77"
+          ]
+        },
+        "sentiment": {
+          "accuracy": 0.41666666666666663,
+          "macro_f1": 0.25,
+          "macro_precision": 0.18055555555555555,
+          "macro_recall": 0.41666666666666663,
+          "datasets": [
+            "financialphrasebank",
+            "rottentomatoes"
+          ]
+        },
+        "topic": {
+          "accuracy": 0.25,
+          "macro_f1": 0.1,
+          "macro_precision": 0.0625,
+          "macro_recall": 0.25,
+          "datasets": [
+            "agnews"
+          ]
+        }
+      },
+      "per_dataset": {
+        "financialphrasebank": {
+          "accuracy": 0.3333333333333333,
+          "macro_f1": 0.16666666666666666,
+          "macro_precision": 0.1111111111111111,
+          "macro_recall": 0.3333333333333333,
+          "n": 150,
+          "n_classes": 3
+        },
+        "rottentomatoes": {
+          "accuracy": 0.5,
+          "macro_f1": 0.3333333333333333,
+          "macro_precision": 0.25,
+          "macro_recall": 0.5,
+          "n": 120,
+          "n_classes": 2
+        },
+        "emotiondair": {
+          "accuracy": 0.16666666666666666,
+          "macro_f1": 0.047619047619047616,
+          "macro_precision": 0.027777777777777776,
+          "macro_recall": 0.16666666666666666,
+          "n": 120,
+          "n_classes": 6
+        },
+        "agnews": {
+          "accuracy": 0.25,
+          "macro_f1": 0.1,
+          "macro_precision": 0.0625,
+          "macro_recall": 0.25,
+          "n": 120,
+          "n_classes": 4
+        },
+        "banking77": {
+          "accuracy": 0.013888888888888888,
+          "macro_f1": 0.000380517503805175,
+          "macro_precision": 0.00019290123456790122,
+          "macro_recall": 0.013888888888888888,
+          "n": 144,
+          "n_classes": 72
+        }
+      },
+      "seconds": 0.0,
+      "kind": "baseline"
+    },
+    "sentence-transformers/all-MiniLM-L6-v2": {
+      "overall": {
+        "accuracy": 0.5833333333333333,
+        "macro_f1": 0.5713290215108381,
+        "macro_precision": 0.5797342354533705,
+        "macro_recall": 0.5833333333333333
+      },
+      "by_task": {
+        "emotion": {
+          "accuracy": 0.375,
+          "macro_f1": 0.3808985132514544,
+          "macro_precision": 0.40318347953216377,
+          "macro_recall": 0.375,
+          "datasets": [
+            "emotiondair"
+          ]
+        },
+        "intent": {
+          "accuracy": 0.5833333333333334,
+          "macro_f1": 0.5410714285714285,
+          "macro_precision": 0.5615740740740741,
+          "macro_recall": 0.5833333333333334,
+          "datasets": [
+            "banking77"
+          ]
+        },
+        "sentiment": {
+          "accuracy": 0.6375,
+          "macro_f1": 0.6310704041506243,
+          "macro_precision": 0.6307987363099654,
+          "macro_recall": 0.6375,
+          "datasets": [
+            "financialphrasebank",
+            "rottentomatoes"
+          ]
+        },
+        "topic": {
+          "accuracy": 0.6833333333333333,
+          "macro_f1": 0.6725343574300586,
+          "macro_precision": 0.6723161510406842,
+          "macro_recall": 0.6833333333333332,
+          "datasets": [
+            "agnews"
+          ]
+        }
+      },
+      "per_dataset": {
+        "financialphrasebank": {
+          "accuracy": 0.6333333333333333,
+          "macro_f1": 0.6204990276220349,
+          "macro_precision": 0.6198914431673052,
+          "macro_recall": 0.6333333333333333,
+          "n": 150,
+          "n_classes": 3,
+          "seconds": 1.93
+        },
+        "rottentomatoes": {
+          "accuracy": 0.6416666666666667,
+          "macro_f1": 0.6416417806792138,
+          "macro_precision": 0.6417060294526258,
+          "macro_recall": 0.6416666666666666,
+          "n": 120,
+          "n_classes": 2,
+          "seconds": 1.41
+        },
+        "emotiondair": {
+          "accuracy": 0.375,
+          "macro_f1": 0.3808985132514544,
+          "macro_precision": 0.40318347953216377,
+          "macro_recall": 0.375,
+          "n": 120,
+          "n_classes": 6,
+          "seconds": 1.37
+        },
+        "agnews": {
+          "accuracy": 0.6833333333333333,
+          "macro_f1": 0.6725343574300586,
+          "macro_precision": 0.6723161510406842,
+          "macro_recall": 0.6833333333333332,
+          "n": 120,
+          "n_classes": 4,
+          "seconds": 2.62
+        },
+        "banking77": {
+          "accuracy": 0.5833333333333334,
+          "macro_f1": 0.5410714285714285,
+          "macro_precision": 0.5615740740740741,
+          "macro_recall": 0.5833333333333334,
+          "n": 144,
+          "n_classes": 72,
+          "seconds": 1.58
+        }
+      },
+      "seconds": 9.93,
+      "kind": "embedding-mean"
+    },
+    "intfloat/e5-base-v2": {
+      "overall": {
+        "accuracy": 0.7051111111111111,
+        "macro_f1": 0.6830194158861107,
+        "macro_precision": 0.7390355964316638,
+        "macro_recall": 0.7051111111111111
+      },
+      "by_task": {
+        "emotion": {
+          "accuracy": 0.5583333333333333,
+          "macro_f1": 0.5456407221758098,
+          "macro_precision": 0.6424183924183924,
+          "macro_recall": 0.5583333333333332,
+          "datasets": [
+            "emotiondair"
+          ]
+        },
+        "intent": {
+          "accuracy": 0.6388888888888888,
+          "macro_f1": 0.6044973544973545,
+          "macro_precision": 0.6391203703703704,
+          "macro_recall": 0.6388888888888888,
+          "datasets": [
+            "banking77"
+          ]
+        },
+        "sentiment": {
+          "accuracy": 0.735,
+          "macro_f1": 0.703728236060265,
+          "macro_precision": 0.7719834098485784,
+          "macro_recall": 0.735,
+          "datasets": [
+            "financialphrasebank",
+            "rottentomatoes"
+          ]
+        },
+        "topic": {
+          "accuracy": 0.8583333333333333,
+          "macro_f1": 0.857502530636859,
+          "macro_precision": 0.8696723996723996,
+          "macro_recall": 0.8583333333333334,
+          "datasets": [
+            "agnews"
+          ]
+        }
+      },
+      "per_dataset": {
+        "financialphrasebank": {
+          "accuracy": 0.6866666666666666,
+          "macro_f1": 0.6291103510634116,
+          "macro_precision": 0.7326115083418454,
+          "macro_recall": 0.6866666666666666,
+          "n": 150,
+          "n_classes": 3,
+          "seconds": 8.93
+        },
+        "rottentomatoes": {
+          "accuracy": 0.7833333333333333,
+          "macro_f1": 0.7783461210571185,
+          "macro_precision": 0.8113553113553114,
+          "macro_recall": 0.7833333333333333,
+          "n": 120,
+          "n_classes": 2,
+          "seconds": 5.83
+        },
+        "emotiondair": {
+          "accuracy": 0.5583333333333333,
+          "macro_f1": 0.5456407221758098,
+          "macro_precision": 0.6424183924183924,
+          "macro_recall": 0.5583333333333332,
+          "n": 120,
+          "n_classes": 6,
+          "seconds": 6.21
+        },
+        "agnews": {
+          "accuracy": 0.8583333333333333,
+          "macro_f1": 0.857502530636859,
+          "macro_precision": 0.8696723996723996,
+          "macro_recall": 0.8583333333333334,
+          "n": 120,
+          "n_classes": 4,
+          "seconds": 13.74
+        },
+        "banking77": {
+          "accuracy": 0.6388888888888888,
+          "macro_f1": 0.6044973544973545,
+          "macro_precision": 0.6391203703703704,
+          "macro_recall": 0.6388888888888888,
+          "n": 144,
+          "n_classes": 72,
+          "seconds": 7.04
+        }
+      },
+      "seconds": 42.84,
+      "kind": "embedding-e5"
+    },
+    "BAAI/bge-base-en-v1.5": {
+      "overall": {
+        "accuracy": 0.6833333333333333,
+        "macro_f1": 0.6553248714397432,
+        "macro_precision": 0.7150887287205638,
+        "macro_recall": 0.6833333333333333
+      },
+      "by_task": {
+        "emotion": {
+          "accuracy": 0.5416666666666666,
+          "macro_f1": 0.5386450352282984,
+          "macro_precision": 0.6204831048581049,
+          "macro_recall": 0.5416666666666666,
+          "datasets": [
+            "emotiondair"
+          ]
+        },
+        "intent": {
+          "accuracy": 0.6666666666666666,
+          "macro_f1": 0.6392195767195767,
+          "macro_precision": 0.6680555555555555,
+          "macro_recall": 0.6666666666666666,
+          "datasets": [
+            "banking77"
+          ]
+        },
+        "sentiment": {
+          "accuracy": 0.7583333333333333,
+          "macro_f1": 0.7131946490935099,
+          "macro_precision": 0.7859789744596393,
+          "macro_recall": 0.7583333333333333,
+          "datasets": [
+            "financialphrasebank",
+            "rottentomatoes"
+          ]
+        },
+        "topic": {
+          "accuracy": 0.6916666666666667,
+          "macro_f1": 0.6723704470638208,
+          "macro_precision": 0.7149470342698797,
+          "macro_recall": 0.6916666666666667,
+          "datasets": [
+            "agnews"
+          ]
+        }
+      },
+      "per_dataset": {
+        "financialphrasebank": {
+          "accuracy": 0.6666666666666666,
+          "macro_f1": 0.5764309764309764,
+          "macro_precision": 0.7215686274509805,
+          "macro_recall": 0.6666666666666666,
+          "n": 150,
+          "n_classes": 3,
+          "seconds": 12.16
+        },
+        "rottentomatoes": {
+          "accuracy": 0.85,
+          "macro_f1": 0.8499583217560434,
+          "macro_precision": 0.850389321468298,
+          "macro_recall": 0.8500000000000001,
+          "n": 120,
+          "n_classes": 2,
+          "seconds": 7.86
+        },
+        "emotiondair": {
+          "accuracy": 0.5416666666666666,
+          "macro_f1": 0.5386450352282984,
+          "macro_precision": 0.6204831048581049,
+          "macro_recall": 0.5416666666666666,
+          "n": 120,
+          "n_classes": 6,
+          "seconds": 7.82
+        },
+        "agnews": {
+          "accuracy": 0.6916666666666667,
+          "macro_f1": 0.6723704470638208,
+          "macro_precision": 0.7149470342698797,
+          "macro_recall": 0.6916666666666667,
+          "n": 120,
+          "n_classes": 4,
+          "seconds": 16.18
+        },
+        "banking77": {
+          "accuracy": 0.6666666666666666,
+          "macro_f1": 0.6392195767195767,
+          "macro_precision": 0.6680555555555555,
+          "macro_recall": 0.6666666666666666,
+          "n": 144,
+          "n_classes": 72,
+          "seconds": 7.89
+        }
+      },
+      "seconds": 52.95,
+      "kind": "embedding-cls"
+    },
+    "cross-encoder/ms-marco-MiniLM-L6-v2": {
+      "overall": {
+        "accuracy": 0.44161111111111107,
+        "macro_f1": 0.39752520211507847,
+        "macro_precision": 0.5845001862416723,
+        "macro_recall": 0.44161111111111107
+      },
+      "by_task": {
+        "emotion": {
+          "accuracy": 0.31666666666666665,
+          "macro_f1": 0.3125507558840892,
+          "macro_precision": 0.5825688608776843,
+          "macro_recall": 0.31666666666666665,
+          "datasets": [
+            "emotiondair"
+          ]
+        },
+        "intent": {
+          "accuracy": 0.5763888888888888,
+          "macro_f1": 0.543805114638448,
+          "macro_precision": 0.5775793650793651,
+          "macro_recall": 0.5763888888888888,
+          "datasets": [
+            "banking77"
+          ]
+        },
+        "sentiment": {
+          "accuracy": 0.495,
+          "macro_f1": 0.41797384966783874,
+          "macro_precision": 0.633487470561774,
+          "macro_recall": 0.495,
+          "datasets": [
+            "financialphrasebank",
+            "rottentomatoes"
+          ]
+        },
+        "topic": {
+          "accuracy": 0.325,
+          "macro_f1": 0.2953224407171775,
+          "macro_precision": 0.49537776412776413,
+          "macro_recall": 0.32499999999999996,
+          "datasets": [
+            "agnews"
+          ]
+        }
+      },
+      "per_dataset": {
+        "financialphrasebank": {
+          "accuracy": 0.4066666666666667,
+          "macro_f1": 0.31078150750281897,
+          "macro_precision": 0.6035762483130904,
+          "macro_recall": 0.4066666666666667,
+          "n": 150,
+          "n_classes": 3,
+          "seconds": 5.89
+        },
+        "rottentomatoes": {
+          "accuracy": 0.5833333333333334,
+          "macro_f1": 0.5251661918328585,
+          "macro_precision": 0.6633986928104576,
+          "macro_recall": 0.5833333333333334,
+          "n": 120,
+          "n_classes": 2,
+          "seconds": 2.4
+        },
+        "emotiondair": {
+          "accuracy": 0.31666666666666665,
+          "macro_f1": 0.3125507558840892,
+          "macro_precision": 0.5825688608776843,
+          "macro_recall": 0.31666666666666665,
+          "n": 120,
+          "n_classes": 6,
+          "seconds": 6.64
+        },
+        "agnews": {
+          "accuracy": 0.325,
+          "macro_f1": 0.2953224407171775,
+          "macro_precision": 0.49537776412776413,
+          "macro_recall": 0.32499999999999996,
+          "n": 120,
+          "n_classes": 4,
+          "seconds": 7.44
+        },
+        "banking77": {
+          "accuracy": 0.5763888888888888,
+          "macro_f1": 0.543805114638448,
+          "macro_precision": 0.5775793650793651,
+          "macro_recall": 0.5763888888888888,
+          "n": 144,
+          "n_classes": 72,
+          "seconds": 74.35
+        }
+      },
+      "seconds": 97.1,
+      "kind": "reranker"
+    },
+    "cross-encoder/nli-roberta-base": {
+      "overall": {
+        "accuracy": 0.5622222222222223,
+        "macro_f1": 0.5480326145210616,
+        "macro_precision": 0.5947722904772721,
+        "macro_recall": 0.5622222222222223
+      },
+      "by_task": {
+        "emotion": {
+          "accuracy": 0.5166666666666667,
+          "macro_f1": 0.511086532961533,
+          "macro_precision": 0.6337089381207028,
+          "macro_recall": 0.5166666666666667,
+          "datasets": [
+            "emotiondair"
+          ]
+        },
+        "intent": {
+          "accuracy": 0.06944444444444445,
+          "macro_f1": 0.05621134212683508,
+          "macro_precision": 0.061080917874396144,
+          "macro_recall": 0.06944444444444445,
+          "datasets": [
+            "banking77"
+          ]
+        },
+        "sentiment": {
+          "accuracy": 0.75,
+          "macro_f1": 0.7301629841060029,
+          "macro_precision": 0.7570113308141154,
+          "macro_recall": 0.75,
+          "datasets": [
+            "financialphrasebank",
+            "rottentomatoes"
+          ]
+        },
+        "topic": {
+          "accuracy": 0.725,
+          "macro_f1": 0.712539229304934,
+          "macro_precision": 0.7650489347630305,
+          "macro_recall": 0.7250000000000001,
+          "datasets": [
+            "agnews"
+          ]
+        }
+      },
+      "per_dataset": {
+        "financialphrasebank": {
+          "accuracy": 0.6666666666666666,
+          "macro_f1": 0.6271780260540525,
+          "macro_precision": 0.6792012330568022,
+          "macro_recall": 0.6666666666666666,
+          "n": 150,
+          "n_classes": 3,
+          "seconds": 46.87
+        },
+        "rottentomatoes": {
+          "accuracy": 0.8333333333333334,
+          "macro_f1": 0.8331479421579533,
+          "macro_precision": 0.8348214285714286,
+          "macro_recall": 0.8333333333333334,
+          "n": 120,
+          "n_classes": 2,
+          "seconds": 23.02
+        },
+        "emotiondair": {
+          "accuracy": 0.5166666666666667,
+          "macro_f1": 0.511086532961533,
+          "macro_precision": 0.6337089381207028,
+          "macro_recall": 0.5166666666666667,
+          "n": 120,
+          "n_classes": 6,
+          "seconds": 38.89
+        },
+        "agnews": {
+          "accuracy": 0.725,
+          "macro_f1": 0.712539229304934,
+          "macro_precision": 0.7650489347630305,
+          "macro_recall": 0.7250000000000001,
+          "n": 120,
+          "n_classes": 4,
+          "seconds": 46.59
+        },
+        "banking77": {
+          "accuracy": 0.06944444444444445,
+          "macro_f1": 0.05621134212683508,
+          "macro_precision": 0.061080917874396144,
+          "macro_recall": 0.06944444444444445,
+          "n": 144,
+          "n_classes": 72,
+          "seconds": 378.61
+        }
+      },
+      "seconds": 538.53,
+      "kind": "nli"
+    }
+  }
+}

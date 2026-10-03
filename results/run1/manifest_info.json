@@ -1,0 +1,38 @@
+{
+  "manifest_hash": "615991c6563e",
+  "n_rows": 4200,
+  "requested_n": 300,
+  "mode": "evaluate",
+  "dataset_keys": [
+    "btzsc_agnews",
+    "btzsc_imdb",
+    "btzsc_rottentomatoes",
+    "btzsc_financialphrasebank",
+    "btzsc_emotiondair",
+    "btzsc_massive",
+    "btzsc_banking77",
+    "ru_sentiment",
+    "massive_en",
+    "massive_ru",
+    "massive_scenario_en",
+    "massive_scenario_ru",
+    "go_emotions_en",
+    "go_emotions_ru"
+  ],
+  "class_coverage": {
+    "btzsc_agnews": 1.0,
+    "btzsc_imdb": 1.0,
+    "btzsc_rottentomatoes": 1.0,
+    "btzsc_financialphrasebank": 1.0,
+    "btzsc_emotiondair": 1.0,
+    "btzsc_massive": 0.9830508474576272,
+    "btzsc_banking77": 1.0,
+    "ru_sentiment": 1.0,
+    "massive_en": 1.0,
+    "massive_ru": 1.0,
+    "massive_scenario_en": 1.0,
+    "massive_scenario_ru": 1.0,
+    "go_emotions_en": 1.0,
+    "go_emotions_ru": 1.0
+  }
+}

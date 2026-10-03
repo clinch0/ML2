@@ -1,0 +1,18 @@
+{
+  "manifest_hash": "e933ea935062",
+  "n_rows": 19356,
+  "requested_n": null,
+  "mode": "replicate",
+  "dataset_keys": [
+    "btzsc_agnews",
+    "btzsc_imdb",
+    "btzsc_rottentomatoes",
+    "btzsc_financialphrasebank"
+  ],
+  "class_coverage": {
+    "btzsc_agnews": 1.0,
+    "btzsc_imdb": 1.0,
+    "btzsc_rottentomatoes": 1.0,
+    "btzsc_financialphrasebank": 1.0
+  }
+}

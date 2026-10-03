@@ -1,0 +1,110 @@
+name: check
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install check-only dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nbformat pytest pandas numpy scikit-learn python-pptx pyarrow
+
+      - name: py_compile
+        run: |
+          python -m py_compile experiment.py scripts/build_btzsc_pptx.py
+          python -m py_compile btzsc_ru/*.py scripts/*.py tests/*.py
+
+      - name: Import without heavy deps (no network, no torch)
+        run: python -c "import experiment, btzsc_ru; print('import ok', btzsc_ru.__version__)"
+
+      - name: Validate notebook
+        run: |
+          python - <<'PY'
+          import json, nbformat
+          nb = nbformat.read("BTZSC_Colab.ipynb", as_version=4)
+          nbformat.validate(nb)
+          src = json.dumps(nb, ensure_ascii=False)
+          assert "import experiment" in src, "ноутбук должен вызывать experiment.py, а не дублировать логику"
+          import ast
+          for i, cell in enumerate(nb.cells):
+              if cell.cell_type != "code":
+                  continue
+              code = "\n".join(("pass  # " + l) if l.strip().startswith(("!", "%")) else l
+                                for l in cell.source.split("\n"))
+              ast.parse(code)   # ловит SyntaxError внутри ячеек до запуска в Colab
+          print("notebook ok, cells:", len(nb.cells))
+          PY
+
+      - name: Tests on synthetic fixtures
+        run: python -m pytest -q tests
+
+      - name: Сквозной прогон конвейера офлайн (локальные parquet, псевдо-модели)
+        run: |
+          BTZSC_LOCAL_DATA=data BTZSC_FAKE_MODELS=1 \
+          BTZSC_BLOCK_DATASETS=btzsc_rottentomatoes,btzsc_financialphrasebank \
+          BTZSC_BLOCK_A_MODELS=intfloat/e5-base-v2,BAAI/bge-base-en-v1.5 \
+          BTZSC_BLOCK_B_MODELS=deepvk/USER-bge-m3,sergeyzh/BERTA \
+          python experiment.py --mode all --run-id ci --out /tmp/ci-run --n-samples 6 \
+          --no-ru-extension --no-finetune
+          python - <<'CHECK'
+          import csv
+          rows = list(csv.DictReader(open("/tmp/ci-run/ci/results.csv", encoding="utf-8")))
+          # anchor пишется как baseline: это модели статьи на полном сплите,
+          # единственные строки прогона, сравнимые с публикацией
+          assert {r["test"] for r in rows} == {"baseline", "block_a", "block_b"}, sorted({r["test"] for r in rows})
+          assert all(r["status"] == "OK" for r in rows), rows
+          print("сквозной прогон:", len(rows), "строк, якорь и оба блока на месте")
+          CHECK
+
+      - name: No tokens and no absolute local paths
+        run: |
+          python - <<'PY'
+          import pathlib, re, sys
+          patterns = {
+              "hf_token": re.compile(r"hf_[A-Za-z0-9]{30,}"),
+              "github_token": re.compile(r"gh[pousr]_[A-Za-z0-9]{30,}"),
+              "abs_home_path": re.compile(r"/(home|Users)/[A-Za-z0-9._-]+/"),
+              "windows_path": re.compile(r"[A-Za-z]:\\\\Users\\\\"),
+          }
+          bad = []
+          for p in pathlib.Path(".").rglob("*"):
+              if not p.is_file() or p.suffix not in {".py", ".ipynb", ".md", ".yml", ".json", ".txt"}:
+                  continue
+              if any(part in {".git", ".work", ".venv", "dist", "runs"} for part in p.parts):
+                  continue
+              text = p.read_text(encoding="utf-8", errors="ignore")
+              for name, rx in patterns.items():
+                  for m in rx.findall(text):
+                      bad.append(f"{p}: {name}: {m[:40]}")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          print("no tokens, no absolute local paths")
+          PY
+
+      - name: Build colab bundle
+        run: python scripts/package_for_colab.py --no-embed --list
+
+      - name: Embedded bundle in notebook is up to date
+        run: python scripts/package_for_colab.py --check-embedded
+
+      - name: Presentation builds without results/
+        run: python scripts/build_btzsc_pptx.py --out /tmp/check.pptx
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: colab-bundle
+          path: dist/colab_bundle.zip
+          if-no-files-found: error

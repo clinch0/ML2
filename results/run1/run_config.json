@@ -1,0 +1,49 @@
+{
+  "mode": "evaluate",
+  "seed": 42,
+  "max_length": 256,
+  "n_samples": null,
+  "dataset_keys": [
+    "btzsc_agnews",
+    "btzsc_imdb",
+    "btzsc_rottentomatoes",
+    "btzsc_financialphrasebank",
+    "btzsc_emotiondair",
+    "btzsc_massive",
+    "btzsc_banking77",
+    "ru_sentiment",
+    "massive_en",
+    "massive_ru",
+    "massive_scenario_en",
+    "massive_scenario_ru",
+    "go_emotions_en",
+    "go_emotions_ru"
+  ],
+  "model_ids": [
+    "cointegrated/rubert-tiny2",
+    "sergeyzh/rubert-tiny-turbo",
+    "ai-forever/ru-en-RoSBERTa",
+    "deepvk/USER-bge-m3",
+    "intfloat/multilingual-e5-base",
+    "sergeyzh/rubert-mini-frida",
+    "sergeyzh/BERTA",
+    "intfloat/multilingual-e5-small",
+    "Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct",
+    "Qwen/Qwen2.5-1.5B-Instruct"
+  ],
+  "time_budget_s": 7200,
+  "time_reserve_s": 600,
+  "encoder_batch_sizes": [
+    8,
+    4,
+    2,
+    1
+  ],
+  "encoder_backend": "hf",
+  "llm_batch_size": 1,
+  "load_in_4bit": true,
+  "extra": {},
+  "resolved_n": 300,
+  "config_hash": "2e08e069fade",
+  "run_id": "run1"
+}

@@ -1,0 +1,20 @@
+# рабочие каталоги агента и прогонов
+.work/
+.venv/
+dist/*
+# архив маленький (~48 КБ) и нужен пользователю для Colab — держим в репозитории
+!dist/colab_bundle.zip
+runs/
+# Архивы прогонов: нужны только до импорта, в репозитории не хранятся
+# (workflow import-results обрабатывает их и может удалять флагом --delete-zip).
+incoming/*.zip
+
+# Тяжёлые артефакты прогона не версионируем: predictions.jsonl после каждого прогона
+# меняется целиком и удваивает историю. В git остаются только сводные файлы
+# (results.csv, summary.csv, run_config.json, environment.json, manifest_info.json, errors.log).
+results/**/predictions.jsonl
+results/**/sample_manifest.csv
+__pycache__/
+*.pyc
+.pytest_cache/
+/content/

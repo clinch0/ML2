@@ -1,0 +1,55 @@
+2026-09-27T20:11:07 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-27T20:11:07 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-27T20:12:13 Qwen/Qwen2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-27T20:12:13 Qwen/Qwen2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-28T09:58:53 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-28T09:58:53 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-28T09:59:19 Qwen/Qwen2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-28T09:59:19 Qwen/Qwen2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-28T20:54:02 манифест пересоздан: manifest_info.json старого формата, без requested_n. Прежние строки results.csv остаются в истории.
+2026-09-28T20:56:45 манифест пересоздан: выборка была на 20 примеров, запрошено 300. Прежние строки results.csv остаются в истории.
+2026-09-28T21:02:34 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-28T21:02:34 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-28T21:06:10 Qwen/Qwen2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-28T21:06:10 Qwen/Qwen2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-29T20:04:30 манифест пересоздан: выборка была на 300 примеров, запрошено 20. Прежние строки results.csv остаются в истории.
+2026-09-29T20:11:17 манифест пересоздан: выборка была на 20 примеров, запрошено 300. Прежние строки results.csv остаются в истории.
+2026-09-30T06:35:20 манифест пересоздан: выборка была на 300 примеров, запрошено 20. Прежние строки results.csv остаются в истории.
+2026-09-30T06:39:32 манифест пересоздан: выборка была на 20 примеров, запрошено 300. Прежние строки results.csv остаются в истории.
+2026-09-30T06:40:40 этап replicate: TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+2026-09-30T14:32:39 манифест пересоздан: выборка была на 300 примеров, запрошено 20 примеров. Прежние строки results.csv остаются в истории.
+2026-09-30T14:35:44 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-30T14:35:44 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-30T14:36:58 Qwen/Qwen2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-30T14:36:58 Qwen/Qwen2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-30T14:37:23 манифест пересоздан: выборка была на 20 примеров, запрошено 300 примеров. Прежние строки results.csv остаются в истории.
+2026-09-30T14:46:42 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-30T14:46:42 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-09-30T14:54:02 Qwen/Qwen2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-09-30T14:54:02 Qwen/Qwen2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-10-01T10:25:29 preflight btzsc_financialphrasebank: btzsc_financialphrasebank: 200 строк не делится на 3 классов
+2026-10-01T10:25:31 preflight btzsc_emotiondair: btzsc_emotiondair: 200 строк не делится на 6 классов
+2026-10-01T10:25:33 preflight btzsc_massive: btzsc_massive: 200 строк не делится на 59 классов
+2026-10-01T10:25:34 preflight btzsc_banking77: btzsc_banking77: 200 строк не делится на 72 классов
+2026-10-01T10:26:20 preflight btzsc_financialphrasebank: btzsc_financialphrasebank: 200 строк не делится на 3 классов
+2026-10-01T10:26:21 preflight btzsc_emotiondair: btzsc_emotiondair: 200 строк не делится на 6 классов
+2026-10-01T10:26:22 preflight btzsc_massive: btzsc_massive: 200 строк не делится на 59 классов
+2026-10-01T10:26:22 preflight btzsc_banking77: btzsc_banking77: 200 строк не делится на 72 классов
+2026-10-01T10:26:32 манифест пересоздан: выборка была на 300 примеров, запрошено 20 примеров. Прежние строки results.csv остаются в истории.
+2026-10-01T10:30:54 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × btzsc_massive: слишком много классов (59), максимум 52
+2026-10-01T10:30:55 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × btzsc_banking77: слишком много классов (72), максимум 52
+2026-10-01T10:30:58 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-10-01T10:30:58 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-10-01T10:32:11 Qwen/Qwen2.5-1.5B-Instruct × btzsc_massive: слишком много классов (59), максимум 52
+2026-10-01T10:32:11 Qwen/Qwen2.5-1.5B-Instruct × btzsc_banking77: слишком много классов (72), максимум 52
+2026-10-01T10:32:15 Qwen/Qwen2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-10-01T10:32:16 Qwen/Qwen2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-10-01T10:32:34 манифест пересоздан: выборка была на 20 примеров, запрошено 300 примеров. Прежние строки results.csv остаются в истории.
+2026-10-01T10:45:07 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × btzsc_massive: слишком много классов (59), максимум 52
+2026-10-01T10:45:07 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × btzsc_banking77: слишком много классов (72), максимум 52
+2026-10-01T10:45:52 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-10-01T10:45:52 Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52
+2026-10-01T10:52:49 Qwen/Qwen2.5-1.5B-Instruct × btzsc_massive: слишком много классов (59), максимум 52
+2026-10-01T10:52:50 Qwen/Qwen2.5-1.5B-Instruct × btzsc_banking77: слишком много классов (72), максимум 52
+2026-10-01T10:53:56 Qwen/Qwen2.5-1.5B-Instruct × massive_en: слишком много классов (59), максимум 52
+2026-10-01T10:53:56 Qwen/Qwen2.5-1.5B-Instruct × massive_ru: слишком много классов (59), максимум 52

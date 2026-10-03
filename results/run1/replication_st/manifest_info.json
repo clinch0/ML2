@@ -1,0 +1,14 @@
+{
+  "manifest_hash": "646f41d87a2d",
+  "n_rows": 1756,
+  "requested_n": null,
+  "mode": "replicate",
+  "dataset_keys": [
+    "btzsc_rottentomatoes",
+    "btzsc_financialphrasebank"
+  ],
+  "class_coverage": {
+    "btzsc_rottentomatoes": 1.0,
+    "btzsc_financialphrasebank": 1.0
+  }
+}

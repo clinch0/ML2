@@ -1,0 +1,533 @@
+{
+  "generated": "2026-09-27",
+  "method": "HF datasets-server (/splits, /rows, /first-rows) + HF API /api/models/<id> + файлы карточек (1_Pooling/config.json, config_sentence_transformers.json, tokenizer_config.chat_template). Веса и полные датасеты не скачивались.",
+  "datasets": {
+    "btzsc_agnews": {
+      "hf_id": "btzsc/btzsc",
+      "config": "agnews",
+      "split": "test",
+      "language": "en",
+      "format": "btzsc_pairs",
+      "columns": {
+        "text": "Value(string)",
+        "hypothesis": "Value(string)",
+        "labels": "ClassLabel(names=[not_entailment, entailment])",
+        "dataset_id": "Value(string)",
+        "label_text": "Value(string)"
+      },
+      "n_rows": 30400,
+      "n_classes": 4,
+      "n_multiclass_examples": 7600,
+      "verbalizers": [
+        "This example news text is about business news",
+        "This example news text is about science and technology",
+        "This example news text is about sports",
+        "This example news text is about world news"
+      ],
+      "all_configs_note": "у btzsc/btzsc 27 конфигов (22 датасета + агрегаты all/sentiment/topic/intent/emotion), у каждого только split test",
+      "status": "OK"
+    },
+    "btzsc_imdb": {
+      "hf_id": "btzsc/btzsc",
+      "config": "imdb",
+      "split": "test",
+      "language": "en",
+      "format": "btzsc_pairs",
+      "columns": {
+        "text": "Value(string)",
+        "hypothesis": "Value(string)",
+        "labels": "ClassLabel(names=[not_entailment, entailment])",
+        "dataset_id": "Value(string)",
+        "label_text": "Value(string)"
+      },
+      "n_rows": 20000,
+      "n_classes": 2,
+      "n_multiclass_examples": 10000,
+      "verbalizers": [
+        "The sentiment in this example imdb movie review is negative",
+        "The sentiment in this example imdb movie review is positive"
+      ],
+      "status": "OK"
+    },
+    "ru_sentiment": {
+      "hf_id": "MonoHime/ru_sentiment_dataset",
+      "config": "default",
+      "splits_real": {
+        "train": 190000,
+        "validation": 21098
+      },
+      "split_used": "validation",
+      "split_note": "тестового split НЕТ; оценка на validation и называется validation",
+      "language": "ru",
+      "format": "flat",
+      "columns": {
+        "Unnamed: 0": "Value(int64)",
+        "text": "Value(string)",
+        "sentiment": "Value(int64), диапазон 0..2"
+      },
+      "label_mapping": {
+        "0": "NEUTRAL",
+        "1": "POSITIVE",
+        "2": "NEGATIVE"
+      },
+      "label_mapping_source": "README.md датасета, раздел «Labels meaning»",
+      "verbalizers": [
+        "Тональность этого русского текста нейтральная",
+        "Тональность этого русского текста положительная",
+        "Тональность этого русского текста отрицательная"
+      ],
+      "status": "OK",
+      "verbalizer_rule": "датасет одноязычный, кросс-языкового сравнения нет, поэтому описание класса дано на языке корпуса — прямое применение правила статьи «короткое понятное описание класса»"
+    },
+    "massive_en": {
+      "hf_id": "mteb/amazon_massive_intent",
+      "config": "en",
+      "split": "test",
+      "language": "en",
+      "format": "flat",
+      "columns": {
+        "id": "Value(string)",
+        "label": "Value(string)",
+        "label_text": "Value(string)",
+        "text": "Value(string)",
+        "lang": "Value(string)"
+      },
+      "n_rows": 2974,
+      "n_classes": 59,
+      "n_classes_source": "полный прогон run1 (results.csv); проба preflight по 50 строкам занижает до 22",
+      "splits_available": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "status": "OK",
+      "replaces": "AmazonScience/massive config en-US",
+      "verbalizers": [
+        "The user request to the voice assistant is about {label}"
+      ],
+      "verbalizer_rule": "описание класса идентично для EN и RU половин (протокол статьи; метки в датасете — англоязычные слаги). Ранее в run1 для русской половины использовалась русская рамка — это было отклонение, исправлено 30.09"
+    },
+    "massive_ru": {
+      "hf_id": "mteb/amazon_massive_intent",
+      "config": "ru",
+      "split": "test",
+      "language": "ru",
+      "format": "flat",
+      "columns": {
+        "id": "Value(string)",
+        "label": "Value(string)",
+        "label_text": "Value(string)",
+        "text": "Value(string)",
+        "lang": "Value(string)"
+      },
+      "n_rows": 2974,
+      "n_classes": 59,
+      "example_row": {
+        "id": "0",
+        "label": "alarm_set",
+        "text": "разбуди меня в пять утра на этой неделе",
+        "lang": "ru"
+      },
+      "status": "OK",
+      "replaces": "AmazonScience/massive config ru-RU",
+      "verbalizers": [
+        "The user request to the voice assistant is about {label}"
+      ],
+      "verbalizer_rule": "описание класса идентично для EN и RU половин (протокол статьи; метки в датасете — англоязычные слаги). Ранее в run1 для русской половины использовалась русская рамка — это было отклонение, исправлено 30.09"
+    },
+    "AmazonScience/massive": {
+      "status": "BLOCKED",
+      "reason": "datasets-server /splits → RuntimeError: \"Dataset scripts are no longer supported, but found massive.py\"; датасет существует, но не грузится современным datasets без loading script",
+      "action": "заменён на mteb/amazon_massive_intent (те же тексты MASSIVE, конфиги en и ru, split test 2974 строки), обоснование в docs/model_audit.md"
+    },
+    "massive_scenario_en": {
+      "hf_id": "mteb/amazon_massive_scenario",
+      "config": "en",
+      "split": "test",
+      "language": "en",
+      "format": "flat",
+      "n_rows": 2974,
+      "n_classes": 18,
+      "columns": {
+        "id": "Value(string)",
+        "label": "Value(string)",
+        "label_text": "Value(string)",
+        "text": "Value(string)",
+        "lang": "Value(string)"
+      },
+      "labels_example": [
+        "alarm",
+        "audio",
+        "datetime",
+        "general",
+        "iot",
+        "music",
+        "news",
+        "play",
+        "takeaway",
+        "weather"
+      ],
+      "status": "OK",
+      "purpose": "параллельная EN/RU задача «тема запроса»; 18 классов < 52 → доступна и для LLM",
+      "verbalizers": [
+        "The user request to the voice assistant belongs to the {label} scenario"
+      ],
+      "verbalizer_rule": "одинаково для обеих половин"
+    },
+    "massive_scenario_ru": {
+      "hf_id": "mteb/amazon_massive_scenario",
+      "config": "ru",
+      "split": "test",
+      "language": "ru",
+      "format": "flat",
+      "n_rows": 2974,
+      "n_classes": 18,
+      "columns": {
+        "id": "Value(string)",
+        "label": "Value(string)",
+        "label_text": "Value(string)",
+        "text": "Value(string)",
+        "lang": "Value(string)"
+      },
+      "labels_example": [
+        "alarm",
+        "audio",
+        "datetime",
+        "general",
+        "iot",
+        "music",
+        "news",
+        "play",
+        "takeaway",
+        "weather"
+      ],
+      "status": "OK",
+      "purpose": "русская половина сценариев; набор меток совпадает с английской",
+      "verbalizers": [
+        "The user request to the voice assistant belongs to the {label} scenario"
+      ],
+      "verbalizer_rule": "одинаково для обеих половин"
+    },
+    "go_emotions_en": {
+      "hf_id": "seara/ru_go_emotions",
+      "config": "simplified",
+      "split": "test",
+      "language": "en",
+      "format": "go_emotions",
+      "n_classes": 28,
+      "columns": {
+        "ru_text": "Value(string)",
+        "text": "Value(string)",
+        "labels": "Sequence(ClassLabel(28))",
+        "id": "Value(string)"
+      },
+      "label_names": [
+        "admiration",
+        "amusement",
+        "anger",
+        "annoyance",
+        "approval",
+        "caring",
+        "confusion",
+        "curiosity",
+        "desire",
+        "disappointment",
+        "disapproval",
+        "disgust",
+        "embarrassment",
+        "excitement",
+        "fear",
+        "gratitude",
+        "grief",
+        "joy",
+        "love",
+        "nervousness",
+        "optimism",
+        "pride",
+        "realization",
+        "relief",
+        "remorse",
+        "sadness",
+        "surprise",
+        "neutral"
+      ],
+      "deviation": "разметка многометочная; берутся строки ровно с одной меткой, число отброшенных пишется в артефакты",
+      "status": "OK",
+      "purpose": "эмоции: английский оригинал GoEmotions",
+      "verbalizers": [
+        "The emotion expressed in this comment is {label}"
+      ],
+      "verbalizer_rule": "одинаково для обеих половин; текст метки — имя класса из датасета"
+    },
+    "go_emotions_ru": {
+      "hf_id": "seara/ru_go_emotions",
+      "config": "simplified",
+      "split": "test",
+      "language": "ru",
+      "format": "go_emotions",
+      "n_classes": 28,
+      "columns": {
+        "ru_text": "Value(string)",
+        "text": "Value(string)",
+        "labels": "Sequence(ClassLabel(28))",
+        "id": "Value(string)"
+      },
+      "label_names": [
+        "admiration",
+        "amusement",
+        "anger",
+        "annoyance",
+        "approval",
+        "caring",
+        "confusion",
+        "curiosity",
+        "desire",
+        "disappointment",
+        "disapproval",
+        "disgust",
+        "embarrassment",
+        "excitement",
+        "fear",
+        "gratitude",
+        "grief",
+        "joy",
+        "love",
+        "nervousness",
+        "optimism",
+        "pride",
+        "realization",
+        "relief",
+        "remorse",
+        "sadness",
+        "surprise",
+        "neutral"
+      ],
+      "deviation": "разметка многометочная; берутся строки ровно с одной меткой, число отброшенных пишется в артефакты",
+      "status": "OK",
+      "purpose": "эмоции: русский перевод тех же строк (колонка ru_text) — строго параллельная пара",
+      "verbalizers": [
+        "The emotion expressed in this comment is {label}"
+      ],
+      "verbalizer_rule": "одинаково для обеих половин; текст метки — имя класса из датасета"
+    }
+  },
+  "models": {
+    "cointegrated/rubert-tiny2": {
+      "role": "encoder",
+      "revision": "e8ed3b0c8bbf4fb6984c3de043bf7d2f4e5969ae",
+      "params_total": 29378550,
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "architecture": "BertForPreTraining / BertModel",
+      "pooling": "cls",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_cls_token=true",
+      "query_prefix": "",
+      "label_prefix": "",
+      "prefix_source": "в карточке префиксы не заданы",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK"
+    },
+    "sergeyzh/rubert-tiny-turbo": {
+      "role": "encoder",
+      "revision": "93769a3baad2b037e5c2e4312fccf6bcfe082bf1",
+      "params_total": 29378550,
+      "params_note": "число параметров указано по базовой модели cointegrated/rubert-tiny2 (base_model в карточке); в API safetensors для этого репозитория не отдан",
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "pooling": "cls",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_cls_token=true",
+      "query_prefix": "",
+      "label_prefix": "",
+      "prefix_source": "в карточке префиксы не заданы",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK"
+    },
+    "ai-forever/ru-en-RoSBERTa": {
+      "role": "encoder",
+      "revision": "89fb1651989adbb1cfcfdedafd7d102951ad0555",
+      "params_total": 403707904,
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "architecture": "RobertaModel",
+      "pooling": "cls",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_cls_token=true",
+      "query_prefix": "classification: ",
+      "label_prefix": "classification: ",
+      "prefix_source": "config_sentence_transformers.json prompts: {classification, search_query, search_document, clustering}",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK"
+    },
+    "deepvk/USER-bge-m3": {
+      "role": "encoder",
+      "revision": "0cc6cfe48e260fb0474c753087a69369e88709ae",
+      "params_total": 359026688,
+      "size_ok_le_4B": true,
+      "license": "apache-2.0",
+      "library": "sentence-transformers",
+      "architecture": "XLMRobertaModel",
+      "pooling": "cls",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_cls_token=true",
+      "query_prefix": "",
+      "label_prefix": "",
+      "prefix_source": "config_sentence_transformers.json: prompts = {} → префиксов нет",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK"
+    },
+    "intfloat/multilingual-e5-base": {
+      "role": "encoder",
+      "revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+      "params_total": 278044162,
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "architecture": "XLMRobertaModel",
+      "pooling": "mean",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_mean_tokens=true",
+      "query_prefix": "query: ",
+      "label_prefix": "passage: ",
+      "prefix_source": "карточка E5: все входы должны начинаться с query: или passage:",
+      "chat_template": null,
+      "in_paper": false,
+      "in_paper_note": "в статье есть e5-base-v2 и e5-large-v2, но НЕ multilingual-e5-base — это другой чекпоинт",
+      "status": "OK"
+    },
+    "Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct": {
+      "role": "llm",
+      "revision": "c9f763e5097587066e602ebabed4d93ea29bb60c",
+      "params_total": 1543298048,
+      "size_ok_le_4B": true,
+      "license": "apache-2.0",
+      "library": "transformers",
+      "architecture": "Qwen2ForCausalLM",
+      "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+      "chat_template": "ChatML: <|im_start|>role\\n…<|im_end|>, eos=<|im_end|>, pad=<|endoftext|> (tokenizer_config.chat_template)",
+      "quantization": "4-bit nf4, batch=1 (ограничение Colab)",
+      "in_paper": false,
+      "status": "OK"
+    },
+    "Qwen/Qwen2.5-1.5B-Instruct": {
+      "role": "llm",
+      "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+      "params_total": 1543714304,
+      "size_ok_le_4B": true,
+      "license": "apache-2.0",
+      "library": "transformers",
+      "architecture": "Qwen2ForCausalLM",
+      "chat_template": "ChatML (карточка Qwen2.5-Instruct)",
+      "quantization": "4-bit nf4, batch=1",
+      "in_paper": false,
+      "in_paper_note": "в статье участвуют Qwen3-4B и Qwen3-8B — другое поколение и другой размер",
+      "status": "OK"
+    },
+    "sergeyzh/rubert-mini-frida": {
+      "role": "encoder",
+      "revision": "32a82388a9f99c99eca74494731f7ee6e9a9fe3a",
+      "params_total": 32262504,
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "architecture": "BertModel",
+      "pooling": "mean",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_mean_tokens=true",
+      "query_prefix": "categorize: ",
+      "label_prefix": "categorize: ",
+      "prefix_source": "config_sentence_transformers.json: default_prompt_name=Classification -> prompts.Classification='categorize: '",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK",
+      "added": "2026-09-30: расширение блока малых русских моделей",
+      "notes": "вторая дистилляция той же ai-forever/FRIDA, 32M; ruMTEB avg 0.643. В блоке Б оставлена как нижняя точка по памяти (153 МБ)"
+    },
+    "sergeyzh/BERTA": {
+      "role": "encoder",
+      "revision": "914c8c8aed14042ed890fc2c662d5e9e66b2faa7",
+      "params_total": 128345088,
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "pooling": "mean",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_mean_tokens=true",
+      "query_prefix": "categorize_entailment: ",
+      "label_prefix": "categorize_entailment: ",
+      "prefix_source": "config_sentence_transformers.json: default_prompt_name=Classification -> 'categorize_entailment: '",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK",
+      "added": "2026-09-30",
+      "notes": "дистилляция ai-forever/FRIDA в sergeyzh/LaBSE-ru-turbo (по карточке модели); CLS-пулинг FRIDA заменён на mean; ruMTEB avg 0.693 против 0.707 у FRIDA"
+    },
+    "intfloat/multilingual-e5-small": {
+      "role": "encoder",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "params_total": 117654272,
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "pooling": "mean",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_mean_tokens=true",
+      "query_prefix": "query: ",
+      "label_prefix": "passage: ",
+      "prefix_source": "карточка E5: query:/passage:",
+      "chat_template": null,
+      "in_paper": false,
+      "status": "OK",
+      "added": "2026-09-30: иностранный мультиязычный baseline малого размера"
+    },
+    "cointegrated/rubert-tiny": {
+      "role": "encoder",
+      "revision": "5441c5ea8026d4f6d7505ec004845409f1259fb1",
+      "params_total": 11913150,
+      "license": "mit",
+      "library": "transformers",
+      "status": "REJECTED",
+      "reason": "в репозитории нет 1_Pooling/config.json и config_sentence_transformers.json: способ агрегации (CLS или mean) документально не подтверждён, а угадывать pooling запрещено"
+    },
+    "ai-forever/FRIDA": {
+      "role": "encoder",
+      "revision": "850455b605544a944739b25f81ddf812b6e3d0d5",
+      "params_total": 823401216,
+      "size_ok_le_4B": true,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "architecture": "T5 (база ai-forever/FRED-T5-1.7B)",
+      "pooling": "cls",
+      "pooling_source": "1_Pooling/config.json: pooling_mode_cls_token=true",
+      "query_prefix": "categorize: ",
+      "label_prefix": "categorize: ",
+      "prefix_source": "config_sentence_transformers.json: prompts.categorize (default_prompt_name=null)",
+      "in_paper": false,
+      "status": "OK",
+      "added": "2026-10-03: топ-1 ruMTEB среди моделей до 3B (avg 0.707), источник — Сбер"
+    },
+    "t-tech/T-lite-it-1.0": {
+      "role": "llm",
+      "revision": "fbabc76f32140416dc5b0ceef392c7778eec1312",
+      "params_total": 7612756480,
+      "size_ok_le_4B": false,
+      "architecture": "Qwen2 (дообучение Qwen-2.5)",
+      "status": "RESERVE",
+      "reason": "7.6B: в bf16 не влезает в T4, в 4-bit (~5 ГБ) влезает; включается как расширение, если ставится отдельный вопрос про русскую LLM бизнес-класса"
+    },
+    "ai-sage/Giga-Embeddings-instruct": {
+      "role": "encoder",
+      "revision": "2cf0fdc97194aaedf10ac0e6bf798834acd31042",
+      "params_total": 3449624576,
+      "license": "mit",
+      "library": "sentence-transformers",
+      "status": "RESERVE",
+      "reason": "3.4B, второе место ruMTEB; кандидат на шестой слот, требует custom_code"
+    },
+    "yandex/YandexGPT-5-Lite-8B": {
+      "role": "llm",
+      "status": "REJECTED",
+      "reason": "LLM, не энкодер; открытых эмбеддеров Яндекс не публикует; лицензия не Apache — коммерческое использование ограничено 10 млн токенов в месяц"
+    }
+  }
+}

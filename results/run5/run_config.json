@@ -1,0 +1,47 @@
+{
+  "mode": "evaluate",
+  "seed": 42,
+  "max_length": 256,
+  "n_samples": null,
+  "dataset_keys": [
+    "ru_sentiment",
+    "massive_en",
+    "massive_ru",
+    "massive_scenario_en",
+    "massive_scenario_ru",
+    "go_emotions_en",
+    "go_emotions_ru"
+  ],
+  "model_ids": [
+    "cointegrated/rubert-tiny2",
+    "sergeyzh/rubert-tiny-turbo",
+    "ai-forever/ru-en-RoSBERTa",
+    "deepvk/USER-bge-m3",
+    "intfloat/multilingual-e5-base",
+    "ai-forever/FRIDA",
+    "sergeyzh/rubert-mini-frida",
+    "sergeyzh/BERTA",
+    "intfloat/multilingual-e5-small",
+    "Vikhrmodels/Vikhr-Qwen-2.5-1.5B-Instruct",
+    "Qwen/Qwen2.5-1.5B-Instruct"
+  ],
+  "time_budget_s": 7200,
+  "time_reserve_s": 600,
+  "encoder_batch_sizes": [
+    32,
+    16,
+    8,
+    4,
+    1
+  ],
+  "encoder_backend": "st",
+  "prefix_policy": "paper_code",
+  "use_chat_template": false,
+  "prefetch_next_model": true,
+  "llm_batch_size": 1,
+  "load_in_4bit": true,
+  "extra": {},
+  "resolved_n": 300,
+  "config_hash": "95ad42c2b7af",
+  "run_id": "run1"
+}
