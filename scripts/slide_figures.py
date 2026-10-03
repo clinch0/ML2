@@ -1,10 +1,9 @@
 """Схемы-объяснялки для презентации: рисуются кодом, а не руками.
 
-Три фигуры, которые не являются графиками по данным, но без которых слайды не читаются:
+Схема метода и график результатов для слайдов:
 
 * `fig6_families.png` — чем отличаются эмбеддинг, реранкер, NLI и LLM и сколько каждый стоит
   в проходах модели (ответ на «методы решения» из задания);
-* `fig7_who.png` — кто из команд что открыл и почему в наборе нет Т-Банка и Яндекса;
 * `fig8_quality_bars.png` — наши результаты столбиками вместо таблицы на десять строк.
 
 Фон непрозрачный светлый: прозрачный PNG с тёмным текстом пропадает в тёмной теме.
@@ -109,53 +108,6 @@ def fig_families() -> Path:
                     "LLM упирается в длину промпта.",
             fontsize=12.5, color=NAVY, fontweight="bold", va="center")
     return save(fig, "fig6_families.png")
-
-
-def fig_who() -> Path:
-    """Кто открыл какие модели и почему в наборе нет Т-Банка и Яндекса."""
-    fig, ax = plt.subplots(figsize=(13.0, 6.4))
-    fig.patch.set_facecolor("white")
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
-    ax.axis("off")
-
-    ax.text(0, 97, "Кто открыл какие модели для русского языка", fontsize=19,
-            fontweight="bold", color=NAVY, va="top")
-    ax.text(0, 91.0, "Нам нужны энкодеры: zero-shot классификация — это в первую очередь они.",
-            fontsize=12.5, color=MUTED, va="top")
-
-    cols = [
-        ("Сбер\nai-forever", "FRIDA\n823 млн\n\nru-en-RoSBERTa\n404 млн", "GigaChat", True),
-        ("VK\ndeepvk", "USER-bge-m3\n359 млн", "—", True),
-        ("Независимые\nразработчики", "BERTA\n128 млн\n\nrubert-mini-frida\n32 млн", "—", True),
-        ("Сообщество\nVikhr", "нет", "Vikhr-Qwen 1.5B\nVikhr-Nemo 12B", False),
-        ("Т-Банк\nt-tech", "нет", "T-lite 8B\nT-pro 32B", False),
-        ("Яндекс", "нет", "YandexGPT-5-Lite\n8B", False),
-    ]
-
-    x0, w, gap = 0.0, 14.6, 1.4
-    ax.text(0, 76.5, "Открытые энкодеры — это и есть наш бенчмарк", fontsize=12.5,
-            fontweight="bold", color=NAVY, va="center")
-    ax.text(0, 45.5, "Открытые языковые модели", fontsize=12.5, fontweight="bold", color=MUTED, va="center")
-
-    for i, (team, enc, llm, has_enc) in enumerate(cols):
-        x = x0 + i * (w + gap)
-        ax.text(x + w / 2, 83.5, team, fontsize=11.0, fontweight="bold", color=INK,
-                ha="center", va="center", linespacing=1.3)
-        box(ax, x, 49.0, w, 23.0, enc, size=9.4, fill="#e8f0fe" if has_enc else "#fdecec",
-            edge=BLUE if has_enc else RED, color=INK if has_enc else RED, bold=not has_enc)
-        box(ax, x, 24.0, w, 20.0, llm, size=9.4, fill="#f3f4f6", edge=LINE, color=MUTED)
-
-    ax.add_patch(FancyBboxPatch((0, 2.0), 100, 17.0, boxstyle="round,pad=0.01,rounding_size=0.01",
-                                linewidth=0, facecolor="#fff7ed", zorder=1))
-    ax.text(1.5, 15.0, "Почему в наборе нет Т-Банка и Яндекса", fontsize=13,
-            fontweight="bold", color=ORANGE, va="center")
-    ax.text(1.5, 7.6,
-            "Они открывают только языковые модели: Т-Банк — T-lite 8 млрд и T-pro 32 млрд,\n"
-            "Яндекс — YandexGPT-5-Lite 8 млрд, и лицензия ограничена. Открытых энкодеров у них нет вовсе,\n"
-            "а 32 млрд в бесплатный Colab не влезают. По самой статье LLM такого класса проигрывают энкодерам.",
-            fontsize=11.0, color=INK, va="center", linespacing=1.5)
-    return save(fig, "fig7_who.png")
 
 
 def fig_quality_bars(rows: list[dict], short: dict[str, str], role: dict[str, str],

@@ -533,16 +533,16 @@ def fig_replication(run_id: str) -> Path | None:
 
 
 def build_slide_figures(ours: list[dict], *, n_samples: str) -> list[Path]:
-    """Схемы-объяснялки для слайдов «Методы», «Кто сделал модели» и «Результаты».
+    """Схема метода и график результатов для слайдов.
 
     Для столбиков берём только тесты `block_a` и `block_b`: это одни и те же 7 датасетов
     статьи у обеих групп. Смешивать их со строками русского расширения нельзя — там другие
     задачи, и среднее по разным наборам задач сравнивать бессмысленно. Старые прогоны без
     колонки `test` рисуются по-прежнему, но с честной подписью «по датасетам прогона».
     """
-    from slide_figures import fig_families, fig_quality_bars, fig_who
+    from slide_figures import fig_families, fig_quality_bars
 
-    made = [fig_families(), fig_who()]
+    made = [fig_families()]
     comparable = [r for r in ours if r.get("test") in ("block_a", "block_b")]
     coverage: dict[tuple[str, str], set[str]] = {}
     for row in comparable:

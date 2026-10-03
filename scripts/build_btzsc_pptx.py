@@ -413,10 +413,9 @@ SPEECH = {
     7: "Наш эксперимент устроен как три теста. Первый проверяет наш код на моделях самой статьи. "
        "Второй сравнивает российские модели с её моделями на одной выборке. Третий измеряет, сколько "
        "стоит переход на русский. Это проверка переносимости протокола, а не ещё один прогон.",
-    8: "Кто вообще делает русские модели. Энкодеры открывают Сбер, VK и независимые разработчики. "
-       "У Т-Банка и Яндекса открытых энкодеров нет вовсе — только языковые модели на восемь и "
-       "тридцать два миллиарда, которые в бесплатный Colab не влезают. Поэтому в наборе их нет, и это "
-       "факт, а не наш выбор.",
+    8: "В блоке Б модели сгруппированы по способу оценки класса. Энкодер сравнивает векторы, "
+       "реранкер оценивает пару текст и класс, NLI проверяет гипотезу, а языковая модель "
+       "выбирает метку из списка. Состав берётся из конфигурации текущего прогона.",
     9: "Тест первый: пять моделей из статьи считаем нашим кодом на полном тестовом сплите — ровно "
        "так, как меряет она. Одиннадцать пар из пятнадцати совпали, шесть из них — до третьего "
        "знака; ещё одна пара на границе допуска. "
@@ -629,13 +628,40 @@ def build_why_russian(prs):
 
 
 def build_who(prs):
-    slide = new_slide(prs, "Какие модели взяли и кто их сделал", 8, SPEECH[8])
-    figure = ROOT / "figures" / "fig7_who.png"
-    if figure.exists():
-        add_picture(slide, figure, Inches(0.5), Inches(1.05), width=Inches(12.3))
-    add_text(slide, Inches(0.5), Inches(6.5), Inches(12.3), Inches(0.5),
-             "В блоке по одной лучшей модели от источника: две дистилляции одной и той же модели "
-             "дублировали бы друг друга.", 16, bold=True, color=NAVY)
+    """Состав блока Б по способу оценки класса из конфигурации прогона."""
+    import sys
+
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from btzsc_ru.config import BLOCK_B_MODEL_IDS, MODELS_BY_ID
+
+    slide = new_slide(prs, "Модели блока Б: роль в классификации", 8, SPEECH[8])
+    grouped = {}
+    for model_id in BLOCK_B_MODEL_IDS:
+        spec = MODELS_BY_ID[model_id]
+        grouped.setdefault(spec.role, []).append(spec)
+    role_info = {
+        "encoder": ("Энкодер", "Сходство отдельных векторов текста и класса"),
+        "reranker": ("Реранкер", "Оценка пары: текст + описание класса"),
+        "nli": ("NLI", "Проверка гипотезы: текст относится к классу"),
+        "llm": ("Языковая модель", "Выбор метки из списка в промпте"),
+    }
+    roles = [role for role in role_info if role in grouped]
+    top, available, gap = 1.12, 5.45, 0.12
+    row_h = (available - gap * (len(roles) - 1)) / len(roles)
+    for index, role in enumerate(roles):
+        y = top + index * (row_h + gap)
+        models = grouped[role]
+        title, method = role_info[role]
+        rect(slide, Inches(0.5), Inches(y), Inches(12.3), Inches(row_h), CARD)
+        add_text(slide, Inches(0.72), Inches(y + 0.17), Inches(2.15), Inches(0.4),
+                 title, 18, bold=True, color=NAVY)
+        add_text(slide, Inches(0.72), Inches(y + 0.58), Inches(2.15), Inches(0.35),
+                 f"{len(models)} моделей" if len(models) != 1 else "1 модель", 14, color=MUTED)
+        add_text(slide, Inches(3.05), Inches(y + 0.13), Inches(5.3), Inches(row_h - 0.22),
+                 ", ".join(spec.short for spec in models), 14, color=INK)
+        add_text(slide, Inches(8.65), Inches(y + 0.13), Inches(3.9), Inches(row_h - 0.22),
+                 method, 14, color=MUTED)
 
 
 def build_test1(prs, run_dir):

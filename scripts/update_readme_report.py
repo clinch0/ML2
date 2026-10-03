@@ -15,7 +15,6 @@ END = "<!-- REPORT:END -->"
 
 FIGURES = (
     ("fig6_families.png", "Семейства моделей", "Схема способов классификации и их вычислительной цены."),
-    ("fig7_who.png", "Какие модели вошли в сравнение", "Схема происхождения и отбора моделей."),
     ("fig0_core_vs_paper.png", "Обе группы на общей шкале", "Блоки А и Б измерены на общей выборке; значения статьи показаны как внешний ориентир."),
     ("fig8_quality_bars.png", "Качество и пиковая память", "Средний macro-F1 по общим задачам; подписи показывают пиковую память."),
     ("fig1_paper_vs_ours.png", "Числа статьи и нашего кода", "Датасеты совпадают, но размер выборки в публикации и нашем основном прогоне различается."),
@@ -188,7 +187,7 @@ def render(run_id: str) -> str:
                 continue
             if not (ROOT / "figures" / filename).exists():
                 raise FileNotFoundError(ROOT / "figures" / filename)
-            if filename in {"fig6_families.png", "fig7_who.png"}:
+            if filename == "fig6_families.png":
                 source = "Схема по коду и списку моделей."
             elif filename in {"fig0_core_vs_paper.png", "fig1_paper_vs_ours.png",
                               "fig4_replication.png"}:
