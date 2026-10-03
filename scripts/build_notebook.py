@@ -65,7 +65,8 @@ MODE = "all"                # ВСЁ САМО: preflight → anchor → БЛОК
 N_SAMPLES = None            # None = 300 примеров на датасет в режиме all; число = вручную
 RUN_ID = "run1"             # тот же RUN_ID = продолжение прогона (resume)
 # Код проекта клонируется из репозитория:
-GIT_REPO_URL = "https://github.com/clinch0/ML2"
+# Только адрес репозитория: ссылку /tree/... на страницу ветки git clone не принимает.
+GIT_REPO_URL = "https://github.com/clinch0/ML2.git"
 GIT_BRANCH = "feature/anchor-cross-encoders"
 PROJECT_DIR = "/content/btzsc_project"
 HF_CACHE = "/content/hf_cache"
@@ -90,8 +91,14 @@ print("MODE:", MODE, "| RUN_ID:", RUN_ID, "| N_SAMPLES:", N_SAMPLES, "| репо
 import os, shutil, subprocess
 
 shutil.rmtree(PROJECT_DIR, ignore_errors=True)
-cmd = ["git", "clone", "--depth", "1", "--branch", GIT_BRANCH, GIT_REPO_URL, PROJECT_DIR]
-subprocess.run(cmd, check=True)
+repo_url = GIT_REPO_URL.rstrip("/").split("/tree/", 1)[0]
+if repo_url != GIT_REPO_URL:
+    print("Адрес страницы ветки преобразован в адрес репозитория:", repo_url)
+cmd = ["git", "clone", "--depth", "1", "--branch", GIT_BRANCH, repo_url, PROJECT_DIR]
+result = subprocess.run(cmd, capture_output=True, text=True)
+if result.returncode:
+    error = result.stderr.strip() or f"git clone завершился с кодом {result.returncode}"
+    raise RuntimeError(f"Не удалось клонировать ветку {GIT_BRANCH} из {repo_url}: {error}")
 if not os.path.isfile(os.path.join(PROJECT_DIR, "experiment.py")):
     raise FileNotFoundError("В клонированном репозитории нет experiment.py")
 print("код проекта загружен:", PROJECT_DIR)
