@@ -8,8 +8,8 @@
   2. импортирует каждый: проверка структуры, пересчёт метрик из predictions.jsonl → results/<run_id>/;
   3. строит графики figures/*.png;
   4. сверяет наши числа с числами статьи на её моделях (если был режим replicate);
-  5. пересобирает Задание2_BTZSC.pptx;
-  6. удаляет импортированный архив (ПОКА ОТКЛЮЧЕНО, см. --delete-zip).
+  5. обновляет числовой отчёт и графики в README.md;
+  6. пересобирает презентацию, если нужны слайды.
 
     python scripts/build_reports.py                 # обработать всё, что лежит
     python scripts/build_reports.py --delete-zip    # с удалением архивов после импорта
@@ -18,6 +18,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import hashlib
 import subprocess
 import sys
 from pathlib import Path
@@ -72,7 +74,22 @@ def run(cmd: list[str], *, required: bool = True) -> bool:
 
 
 def run_id_of(path: Path) -> str:
-    return path.stem.replace("colab_outputs_", "")
+    return path.stem.removeprefix("colab_outputs_")
+
+
+def figure_sample_size(run_id: str) -> str:
+    """Берём наибольшую успешную выборку основного прогона, исключая baseline."""
+    path = ROOT / "results" / run_id / "results.csv"
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    counts: dict[str, int] = {}
+    for row in rows:
+        size = row.get("n_samples", "")
+        if row.get("status") == "OK" and size and row.get("test") != "baseline":
+            counts[size] = counts.get(size, 0) + 1
+    if not counts:
+        raise ValueError(f"В {path} нет успешных строк основного прогона")
+    return max(counts, key=int)
 
 
 def main() -> int:
@@ -90,20 +107,31 @@ def main() -> int:
         return 0
 
     processed: list[str] = []
+    failed: list[str] = []
     for raw in archives:
         target = normalise_name(raw)
         run_id = run_id_of(target)
         print(f"\n=== прогон {run_id}: {raw.name} ===")
+        digest = hashlib.sha256(target.read_bytes()).hexdigest()
+        run_dir = ROOT / "results" / run_id
+        digest_path = run_dir / "source_archive.sha256"
+        if run_dir.exists() and digest_path.exists() and digest_path.read_text().strip() == digest and not args.force:
+            print("этот архив уже импортирован — пропуск")
+            continue
         import_cmd = [PYTHON, "scripts/import_colab_outputs.py", str(target)]
-        if args.force:
+        if args.force or run_dir.exists():
             import_cmd.append("--force")
         if not run(import_cmd, required=False):
-            print("импорт отклонён (см. причину выше) — отчёты не пересобираются")
+            print("импорт отклонён (см. причину выше) — отчёт не обновляется")
+            failed.append(raw.name)
             continue
         processed.append(run_id)
 
-        run([PYTHON, "scripts/make_figures.py", "--run-id", run_id], required=False)
+        run([PYTHON, "scripts/make_figures.py", "--run-id", run_id,
+             "--n", figure_sample_size(run_id)])
         run([PYTHON, "scripts/check_replication.py", "--run-id", run_id], required=False)
+        run([PYTHON, "scripts/update_readme_report.py", "--run-id", run_id])
+        digest_path.write_text(digest + "\n", encoding="utf-8")
 
         # --- удаление обработанного архива ---
         # Пока отключено намеренно: на отладке архивы нужны, чтобы перезапускать импорт.
@@ -120,6 +148,9 @@ def main() -> int:
         run([PYTHON, "scripts/build_btzsc_pptx.py"], required=False)
 
     print(f"\nготово. Обработано прогонов: {', '.join(processed)}")
+    if failed:
+        print("не импортированы:", ", ".join(failed))
+        return 1
     return 0
 
 

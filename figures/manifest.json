@@ -1,0 +1,15 @@
+{
+  "run_id": "run5",
+  "n_samples": "300",
+  "files": [
+    "fig0_core_vs_paper.png",
+    "fig1_paper_vs_ours.png",
+    "fig2_delta_en_ru.png",
+    "fig3_quality_vs_latency.png",
+    "fig5_delta_by_task.png",
+    "fig6_families.png",
+    "fig7_who.png",
+    "fig8_quality_bars.png",
+    "fig4_replication.png"
+  ]
+}

@@ -128,7 +128,7 @@ def load_paper() -> list[dict]:
     return out
 
 
-def fig_paper_vs_ours(ours: list[dict], paper: list[dict]) -> Path:
+def fig_paper_vs_ours(ours: list[dict], paper: list[dict], n_samples: str) -> Path:
     """Распределение моделей статьи против наших чисел на её же двух датасетах.
 
     В правой колонке — обе группы прогона: модели статьи, посчитанные нашим кодом (блок А),
@@ -179,7 +179,7 @@ def fig_paper_vs_ours(ours: list[dict], paper: list[dict]) -> Path:
 
         ax.set_xlim(-0.55, 3.1)
         ax.set_xticks([0, 1])
-        ax.set_xticklabels(["статья\n(полные тесты)", "наш прогон\n(300 примеров)"], fontsize=9.5)
+        ax.set_xticklabels(["статья\n(полные тесты)", f"наш прогон\n({n_samples} примеров)"], fontsize=9.5)
         ax.set_ylim(0.10, top_limit)
         ax.set_ylabel("macro-F1")
         ax.set_title(label, fontsize=13, weight="bold", pad=10)
@@ -203,7 +203,7 @@ def fig_paper_vs_ours(ours: list[dict], paper: list[dict]) -> Path:
     return save(fig, "fig1_paper_vs_ours.png")
 
 
-def fig_delta_en_ru(ours: list[dict]) -> Path:
+def fig_delta_en_ru(ours: list[dict], n_samples: str) -> Path:
     per = {}
     for r in ours:
         if r["dataset_key"] in ("massive_en", "massive_ru"):
@@ -224,7 +224,7 @@ def fig_delta_en_ru(ours: list[dict]) -> Path:
     ax.set_yticklabels([SHORT.get(m, m.split("/")[-1]) for m, _, _ in items], fontsize=9.5)
     for lbl in ax.get_xticklabels() + ax.get_yticklabels():
         lbl.set_path_effects(HALO)
-    ax.set_xlabel("macro-F1 на MASSIVE (59 классов, 300 примеров)")
+    ax.set_xlabel(f"macro-F1 на MASSIVE (59 классов, {n_samples} примеров)")
     # Границы — по данным: при фиксированном окне модели с околонулевым качеством
     # (LLM на 59 классах) уезжали за левый край и строка выглядела пустой.
     lo = min(min(en, ru) for _, en, ru in items)
@@ -255,7 +255,7 @@ CORE_KEYS = ("btzsc_agnews", "btzsc_imdb", "btzsc_rottentomatoes", "btzsc_financ
              "btzsc_emotiondair", "btzsc_massive", "btzsc_banking77")
 
 
-def fig_core_vs_paper(ours: list[dict]) -> Path | None:
+def fig_core_vs_paper(ours: list[dict], n_samples: str) -> Path | None:
     """Главный график: обе группы прогона против распределения моделей статьи.
 
     Правая колонка — только тесты block_a и block_b: одни и те же семь датасетов статьи
@@ -317,7 +317,7 @@ def fig_core_vs_paper(ours: list[dict]) -> Path | None:
     ax.set_xlim(-0.6, 2.75)
     ax.set_xticks([0, 1])
     ax.set_xticklabels([f"{len(paper)} моделей статьи\n(её числа, полные тесты)",
-                        "наш прогон\n(блоки А и Б, 300 примеров)"], fontsize=10.5)
+                        f"наш прогон\n(блоки А и Б, {n_samples} примеров)"], fontsize=10.5)
     ax.scatter([], [], s=120, color="#0b2e59", label="блок А — модели статьи, наш код")
     ax.scatter([], [], s=120, color="#1f6feb", label="блок Б — российские модели")
     ax.scatter([], [], s=120, color=COLOR["LLM 1.5B"], label="LLM 1.5B в 4-bit")
@@ -532,7 +532,7 @@ def fig_replication(run_id: str) -> Path | None:
     return save(fig, "fig4_replication.png")
 
 
-def build_slide_figures(ours: list[dict]) -> list[Path]:
+def build_slide_figures(ours: list[dict], *, n_samples: str) -> list[Path]:
     """Схемы-объяснялки для слайдов «Методы», «Кто сделал модели» и «Результаты».
 
     Для столбиков берём только тесты `block_a` и `block_b`: это одни и те же 7 датасетов
@@ -544,10 +544,16 @@ def build_slide_figures(ours: list[dict]) -> list[Path]:
 
     made = [fig_families(), fig_who()]
     comparable = [r for r in ours if r.get("test") in ("block_a", "block_b")]
-    same_scale = bool(comparable)
-    bars = fig_quality_bars(comparable or ours, SHORT, ROLE, same_scale=same_scale)
-    if bars is not None:
-        made.append(bars)
+    coverage: dict[tuple[str, str], set[str]] = {}
+    for row in comparable:
+        coverage.setdefault((row["test"], row["model_id"]), set()).add(row["dataset_key"])
+    same_scale = ({"block_a", "block_b"} <= {test for test, _ in coverage}
+                  and all(keys == set(CORE_KEYS) for keys in coverage.values()))
+    if same_scale:
+        bars = fig_quality_bars(comparable, SHORT, ROLE, same_scale=True,
+                                n_samples=n_samples)
+        if bars is not None:
+            made.append(bars)
     return made
 
 
@@ -562,17 +568,48 @@ def main() -> int:
         raise SystemExit(f"в results/{args.run_id}/results.csv нет строк OK с n_samples={args.n}")
     paper = load_paper()
     made = []
-    core = fig_core_vs_paper(ours)
-    if core is not None:
-        made.append(core)
-    made += [fig_paper_vs_ours(ours, paper), fig_delta_en_ru(ours), fig_quality_vs_latency(ours)]
+    core_coverage: dict[tuple[str, str], set[str]] = {}
+    for row in ours:
+        if row.get("test") in ("block_a", "block_b"):
+            core_coverage.setdefault((row["test"], row["model_id"]), set()).add(row["dataset_key"])
+    if ({"block_a", "block_b"} <= {test for test, _ in core_coverage}
+            and all(keys == set(CORE_KEYS) for keys in core_coverage.values())):
+        core = fig_core_vs_paper(ours, args.n)
+        if core is not None:
+            made.append(core)
+    if paper and all(any(r["dataset_key"] == key and r.get("test") == test
+                         for r in ours)
+                     for test in ("block_a", "block_b")
+                     for key in ("btzsc_agnews", "btzsc_imdb")):
+        made.append(fig_paper_vs_ours(ours, paper, args.n))
+    by_model: dict[str, set[str]] = {}
+    for row in ours:
+        by_model.setdefault(row["model_id"], set()).add(row["dataset_key"])
+    if any({"massive_en", "massive_ru"} <= keys for keys in by_model.values()):
+        made.append(fig_delta_en_ru(ours, args.n))
+    ru_keys = _ru_extension_keys()
+    latency_candidates = [r for r in ours if r.get("test") == "ru_extension"
+                          and r["dataset_key"] in ru_keys
+                          and float(r.get("ms_per_example") or 0) > 0]
+    latency_coverage: dict[str, set[str]] = {}
+    for row in latency_candidates:
+        latency_coverage.setdefault(row["model_id"], set()).add(row["dataset_key"])
+    complete_models = {model for model, keys in latency_coverage.items() if keys == ru_keys}
+    if complete_models:
+        made.append(fig_quality_vs_latency(
+            [r for r in latency_candidates if r["model_id"] in complete_models]))
     by_task = fig_delta_by_task(ours)
     if by_task is not None:
         made.append(by_task)
-    made += build_slide_figures(ours)
+    made += build_slide_figures(ours, n_samples=args.n)
     rep = fig_replication(args.run_id)
     if rep is not None:
         made.append(rep)
+    manifest = {"run_id": args.run_id, "n_samples": args.n,
+                "files": [path.name for path in made]}
+    (FIGDIR / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     for path in made:
         print(f"{path} ({path.stat().st_size} байт)")
     print(f"моделей статьи в сравнении: {len(paper)}; наших строк: {len(ours)}")

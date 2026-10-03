@@ -8,12 +8,12 @@ on:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -95,15 +95,16 @@ jobs:
           PY
 
       - name: Build colab bundle
-        run: python scripts/package_for_colab.py --no-embed --list
+        run: python scripts/package_for_colab.py --list
 
-      - name: Embedded bundle in notebook is up to date
+      - name: Notebook contains no embedded bundle
         run: python scripts/package_for_colab.py --check-embedded
 
-      - name: Presentation builds without results/
+      - name: Presentation builds from checked-in data
         run: python scripts/build_btzsc_pptx.py --out /tmp/check.pptx
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
+        if: ${{ !env.ACT }}
         with:
           name: colab-bundle
           path: dist/colab_bundle.zip

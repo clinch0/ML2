@@ -86,6 +86,14 @@ def main() -> int:
     parser.add_argument("--check-embedded", action="store_true",
                         help="проверить отсутствие встроенного архива в ноутбуке")
     args = parser.parse_args()
+    if args.check_embedded:
+        notebook_text = NOTEBOOK.read_text(encoding="utf-8")
+        if "BUNDLE_B64" in notebook_text or "BUNDLE_PAYLOAD" in notebook_text:
+            print("в ноутбуке остался встроенный архив")
+            return 1
+        print("ноутбук не содержит встроенного архива")
+        return 0
+
     out = build(Path(args.out))
     with zipfile.ZipFile(out) as zf:
         names = zf.namelist()
@@ -93,18 +101,6 @@ def main() -> int:
     if args.list:
         for n in names:
             print("  " + n)
-
-    if args.check_embedded:
-        notebook_text = NOTEBOOK.read_text(encoding="utf-8")
-        if "BUNDLE_B64" in notebook_text or "BUNDLE_PAYLOAD" in notebook_text:
-            print("в ноутбуке остался встроенный архив")
-            return 1
-        print("ноутбук не содержит встроенного архива")
-    return 0
-
-    if not args.no_embed:
-        changed = embed_into_notebook(out)
-        print("ноутбук обновлён" if changed else "ноутбук уже содержал актуальный bundle")
     return 0
 
 

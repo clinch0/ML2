@@ -159,7 +159,7 @@ def fig_who() -> Path:
 
 
 def fig_quality_bars(rows: list[dict], short: dict[str, str], role: dict[str, str],
-                     *, same_scale: bool = True) -> Path | None:
+                     *, same_scale: bool = True, n_samples: str = "300") -> Path | None:
     """Результаты столбиками: длина — качество, подпись — пиковая память.
 
     Усреднять можно только по ОДНОМУ набору задач. Поэтому сюда передаются строки
@@ -197,7 +197,7 @@ def fig_quality_bars(rows: list[dict], short: dict[str, str], role: dict[str, st
     ax.set_yticklabels([short.get(m, m.split("/")[-1]) for m, _, _, _ in items], fontsize=10.5)
     ax.set_xlim(0, max(v for _, v, _, _ in items) * 1.3)
     if same_scale:
-        ax.set_xlabel("macro-F1, среднее по 7 датасетам статьи (по 300 примеров у всех моделей)")
+        ax.set_xlabel(f"macro-F1, среднее по 7 датасетам статьи (по {n_samples} примеров у всех моделей)")
         subtitle = ("Обе группы считались одним кодом на одних и тех же задачах. "
                     "Подпись у столбика — пиковая память GPU в прогоне, а не размер весов.")
     else:

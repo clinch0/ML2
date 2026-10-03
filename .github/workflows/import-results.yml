@@ -2,7 +2,7 @@ name: import-results
 
 # Триггер: в репозиторий попал архив с результатами прогона Colab.
 # Что делает: распаковывает, пересчитывает метрики, обновляет отчёт, графики,
-# сверку с числами статьи и презентацию, затем коммитит результат обратно в ветку.
+# сверку с числами статьи и README, затем коммитит результат обратно в ветку.
 on:
   push:
     paths:
@@ -15,14 +15,14 @@ permissions:
 
 jobs:
   build-reports:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -39,29 +39,30 @@ jobs:
           # Удаление архивов после импорта пока ОТКЛЮЧЕНО (режим отладки).
           # Когда цепочка будет обкатана — добавить флаг --delete-zip:
           # python scripts/build_reports.py --delete-zip
-          python scripts/build_reports.py
+          python scripts/build_reports.py --skip-pptx
 
       - name: Show what changed
         run: git status --short
 
       - name: Commit updated reports
+        if: ${{ !env.ACT }}
         run: |
-          if [ -z "$(git status --porcelain)" ]; then
+          git add -A -- README.md results figures
+          if git diff --cached --quiet; then
             echo "изменений нет"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add results figures "Эксперимент_BTZSC.md" "Задание2_BTZSC.pptx" incoming || true
           git commit -m "Авто-сборка отчётов из архива прогона [skip ci]"
-          git push origin HEAD:${GITHUB_REF_NAME}
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
+        if: ${{ !env.ACT }}
         with:
           name: reports
           path: |
+            README.md
             results/**
             figures/**
-            Эксперимент_BTZSC.md
-            Задание2_BTZSC.pptx
           if-no-files-found: warn

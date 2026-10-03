@@ -4,7 +4,7 @@
 1. проверяет структуру zip (обязательные файлы, наличие run_id);
 2. пересчитывает метрики ИЗ predictions.jsonl (не доверяя results.csv);
 3. пишет results/<run_id>/ (results.csv, results_recomputed.csv, summary.csv, остальные артефакты);
-4. обновляет раздел «Результаты» в Эксперимент_BTZSC.md таблицей с числами из артефактов.
+4. при наличии отдельного старого отчёта обновляет его; README обновляет build_reports.py.
 
 Использование:
     python scripts/import_colab_outputs.py incoming/colab_outputs_run1.zip
@@ -17,9 +17,11 @@ import csv
 import io
 import json
 import re
+import shutil
 import sys
+import tempfile
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -38,14 +40,21 @@ class ImportError_(RuntimeError):
 
 
 def run_id_from_name(name: str) -> str:
-    m = re.match(r"colab_outputs_(.+)\.zip$", Path(name).name)
+    m = re.fullmatch(r"colab_outputs_([A-Za-z0-9][A-Za-z0-9._-]*)\.zip", Path(name).name)
     if not m:
         raise ImportError_(f"имя архива должно быть colab_outputs_<run_id>.zip, получено {Path(name).name}")
     return m.group(1)
 
 
 def validate(zf: zipfile.ZipFile) -> None:
-    names = set(zf.namelist())
+    members = zf.namelist()
+    names = set(members)
+    if len(members) != len(names):
+        raise ImportError_("в ZIP есть повторяющиеся имена файлов")
+    for name in members:
+        parts = PurePosixPath(name).parts
+        if name.startswith(("/", "\\")) or "\\" in name or ".." in parts or not parts:
+            raise ImportError_(f"небезопасный путь внутри ZIP: {name}")
     if not names:
         raise ImportError_(
             "архив пуст (0 файлов). Значит, в каталоге прогона на Colab нечего было экспортировать: "
@@ -260,9 +269,24 @@ def import_zip(zip_path: Path, out_root: Path | None = None, report_path: Path |
             raise ImportError_("predictions.jsonl пуст — импортировать нечего")
         recomputed = recompute(records, rows_by_run_key(zf))
         mismatches = compare_with_reported(zf, recomputed)
-        out_dir = write_outputs(zf, run_id, recomputed, out_root)
-    block = render_table(run_id, recomputed, mismatches)
-    updated = update_report(block, report_path)
+        block = render_table(run_id, recomputed, mismatches)
+        out_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=f".{run_id}-", dir=out_root) as temp_dir:
+            staging = Path(temp_dir)
+            staged = write_outputs(zf, run_id, recomputed, staging)
+            out_dir = out_root / run_id
+            backup = staging / "previous"
+            if out_dir.exists():
+                out_dir.rename(backup)
+            try:
+                staged.rename(out_dir)
+                updated = update_report(block, report_path)
+            except Exception:
+                if out_dir.exists():
+                    shutil.rmtree(out_dir)
+                if backup.exists():
+                    backup.rename(out_dir)
+                raise
     return {
         "run_id": run_id,
         "out_dir": str(out_dir),
